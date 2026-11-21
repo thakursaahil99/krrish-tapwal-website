@@ -6,7 +6,6 @@ import { JsonLd, PageHero, SectionHeading } from "@/components/ui";
 import { products } from "@/data/shop";
 import { site } from "@/data/site";
 import { breadcrumbSchema, graph } from "@/lib/schema";
-import { thumb } from "@/lib/youtube";
 
 export const metadata: Metadata = {
   title: "Shop",
@@ -38,7 +37,7 @@ export default function ShopPage() {
 
       <PageHero
         eyebrow="Store · Launching soon"
-        image={thumb("HAmoqYBhXBA", "max")}
+        video={site.backgroundVideos.shop}
         title={
           <>
             The <span className="text-glow">drop</span>

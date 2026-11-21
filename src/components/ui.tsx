@@ -1,4 +1,4 @@
-import Image from "next/image";
+import HeroVideo from "./HeroVideo";
 import type { CSSProperties, ReactNode } from "react";
 import { categoryLabels, type Short, type Video } from "@/data/videos";
 import { compactNumber, formatDate } from "@/lib/format";
@@ -63,26 +63,21 @@ export function SectionHeading({
 export function PageHero({
   eyebrow,
   title,
-  image,
-  imagePosition = "center",
+  video,
   children,
   aside,
 }: {
   eyebrow?: ReactNode;
   title: ReactNode;
-  image: string;
-  imagePosition?: string;
+  /** Faded background video for this page (see `site.backgroundVideos`) */
+  video: { id: string; start?: number };
   children?: ReactNode;
   aside?: ReactNode;
 }) {
   return (
     <section className="relative isolate flex min-h-[80svh] items-end overflow-hidden pb-16 pt-36 md:pb-24">
-      <div className="absolute inset-0 -z-10">
-        <Image src={image} alt="" fill preload quality={90} sizes="100vw" className="animate-kenburns object-cover opacity-60" style={{ objectPosition: imagePosition }} />
-        <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/75 to-ink/40" />
-        <div className="absolute inset-0 bg-gradient-to-r from-ink/90 via-ink/30 to-transparent" />
-        <div className="grid-bg absolute inset-0" />
-      </div>
+      <HeroVideo {...video} />
+      <div className="grid-bg absolute inset-0 -z-10" aria-hidden="true" />
       <div className="container-x grid w-full items-end gap-12 lg:grid-cols-[1.5fr_1fr]">
         <div>
           {eyebrow && (

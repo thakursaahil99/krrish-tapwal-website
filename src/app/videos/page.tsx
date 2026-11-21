@@ -8,7 +8,7 @@ import { JsonLd, PageHero, SectionHeading, ShortCard } from "@/components/ui";
 import { site } from "@/data/site";
 import { formatDate } from "@/lib/format";
 import { breadcrumbSchema, graph, videoSchema } from "@/lib/schema";
-import { getChannelContent, getChannelStats, thumb } from "@/lib/youtube";
+import { getChannelContent, getChannelStats } from "@/lib/youtube";
 
 export const revalidate = 900;
 
@@ -42,7 +42,7 @@ export default async function VideosPage() {
 
       <PageHero
         eyebrow={`${site.brand} · Channel`}
-        image={thumb("sY2h1Gsx_ZI", "max")}
+        video={site.backgroundVideos.videos}
         title={
           <>
             Watch the <span className="text-glow">trail</span>

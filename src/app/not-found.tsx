@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHero } from "@/components/ui";
+import { site } from "@/data/site";
 
 export const metadata: Metadata = {
   title: "Page Not Found",
@@ -11,8 +12,7 @@ export default function NotFound() {
   return (
     <PageHero
       eyebrow="Error 404 · Signal lost"
-      image="/images/krrish-tapwal.jpg"
-      imagePosition="76% center"
+      video={site.backgroundVideos.notFound}
       title={
         <>
           Trail <span className="text-glow">not found</span>

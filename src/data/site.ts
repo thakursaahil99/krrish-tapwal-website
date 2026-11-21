@@ -23,12 +23,19 @@ export const site = {
   hero: {
     kicker: "Sarkaghat · Mandi · Himachal Pradesh",
     lead: "Forgotten forts, hilltop temples, misty mountain roads — and the people who make every trail feel like home. Pahadi by heart, engineer by trade.",
-    /**
-     * Hero ke peeche chalne wali (muted, faded) YouTube video.
-     * `id` = video ID (youtube.com/watch?v=YAHAN_WALA), `start` = kitne second se shuru ho.
-     * Hero ki photo apne aap aapki latest YouTube profile photo hoti hai.
-     */
-    bgVideo: { id: "sY2h1Gsx_ZI", start: 60 },
+  },
+
+  /**
+   * Har page ke hero ke peeche chalne wali (muted, faded, loop) YouTube video.
+   * `id` = video ID (youtube.com/watch?v=YAHAN_WALA), `start` = kitne second se shuru ho.
+   * (Home hero ki photo apne aap aapki latest YouTube profile photo hoti hai.)
+   */
+  backgroundVideos: {
+    home: { id: "QHAmMv4mdRE", start: 90 }, // Kanchana Mata Temple, Anantpur Garh
+    about: { id: "Zt6EH13HBM8", start: 60 }, // Bengaluru → Himachal road trip
+    videos: { id: "sY2h1Gsx_ZI", start: 60 }, // Morning ride in the mountains
+    shop: { id: "xcYFq7LX7Is", start: 60 }, // Diwali at home
+    notFound: { id: "sbHuha-IWzY", start: 60 }, // Kamlah Fort trail
   },
 
   // "Who I am" chips + cards (About & Home)

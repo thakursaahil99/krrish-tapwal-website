@@ -10,7 +10,7 @@ import { JsonLd, PageHero, PlayBadge, SectionHeading, StatTile } from "@/compone
 import { site } from "@/data/site";
 import { places, timeline } from "@/data/videos";
 import { breadcrumbSchema, faqSchema, graph, profilePageSchema } from "@/lib/schema";
-import { getChannelProfileImage, getChannelStats, thumb, watchUrl } from "@/lib/youtube";
+import { getChannelProfileImage, getChannelStats, watchUrl } from "@/lib/youtube";
 
 export const revalidate = 900;
 
@@ -65,8 +65,7 @@ export default async function AboutPage() {
 
       <PageHero
         eyebrow="About · Creator file"
-        image={thumb("QHAmMv4mdRE", "max")}
-        imagePosition="center 30%"
+        video={site.backgroundVideos.about}
         title={
           <>
             The <span className="text-glow">human</span>

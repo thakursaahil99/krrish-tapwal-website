@@ -58,7 +58,7 @@ export default async function HomePage() {
 
       {/* ================= HERO ================= */}
       <section className="relative isolate overflow-hidden pb-20 pt-32 md:pt-36 lg:min-h-[100svh] lg:pb-24" aria-labelledby="hero-title">
-        <HeroVideo id={site.hero.bgVideo.id} start={site.hero.bgVideo.start} />
+        <HeroVideo {...site.backgroundVideos.home} />
         <div className="container-x grid items-center gap-16 lg:grid-cols-[1fr_1.05fr] lg:gap-12">
           {/* Copy */}
           <div className="relative z-10">
