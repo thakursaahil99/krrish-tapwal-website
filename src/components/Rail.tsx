@@ -34,7 +34,8 @@ export default function Rail({ children, label, autoScroll }: { children: ReactN
     window.addEventListener("resize", measure);
 
     let visible = false;
-    const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting), { threshold: 0.2 });
+    // start gliding only once at least half the belt is on screen, so it begins from the first reel
+    const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting), { threshold: 0.5 });
     io.observe(el);
 
     // Keeps gliding even with the mouse over it or reels playing; only a touch/drag
@@ -123,8 +124,9 @@ export default function Rail({ children, label, autoScroll }: { children: ReactN
         role="region"
         aria-label={label}
         tabIndex={0}
-        className={`no-scrollbar flex gap-4 overflow-x-auto px-5 pb-2 sm:px-8 lg:px-[max(3rem,calc((100vw_-_86rem)/2_+_3rem))] ${
-          looping ? "" : "snap-x snap-mandatory scroll-px-5 sm:scroll-px-8 lg:scroll-px-[max(3rem,calc((100vw_-_86rem)/2_+_3rem))]"
+        className={`no-scrollbar flex gap-4 overflow-x-auto pb-2 ${
+          // looping belt runs edge-to-edge from the very left of the screen; the snapping rail lines up with the page content
+          looping ? "px-0" : "snap-x snap-mandatory scroll-px-5 px-5 sm:scroll-px-8 sm:px-8 lg:scroll-px-[max(3rem,calc((100vw_-_86rem)/2_+_3rem))] lg:px-[max(3rem,calc((100vw_-_86rem)/2_+_3rem))]"
         }`}
       >
         {children}
