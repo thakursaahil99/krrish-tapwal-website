@@ -8,8 +8,8 @@ import { ArrowRightIcon } from "./icons";
  *
  * `autoScroll` (pixels per second) turns it into an endless conveyor belt: the cards
  * glide continuously and repeat forever (a second copy follows the first, and the
- * position wraps invisibly). It pauses while hovered, touched or focused, after the
- * arrow buttons are used, and while it's off screen. Without it the rail snaps per card.
+ * position wraps invisibly). It keeps moving under the mouse; a touch/drag, focus or
+ * the arrow buttons pause it briefly, and it rests while off screen. Without it the rail snaps per card.
  */
 export default function Rail({ children, label, autoScroll }: { children: ReactNode; label: string; autoScroll?: number }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -17,7 +17,6 @@ export default function Rail({ children, label, autoScroll }: { children: ReactN
   const [progress, setProgress] = useState(0);
   const [edges, setEdges] = useState({ start: true, end: false });
   const hold = useRef(0); // timestamp until which auto-scroll stays paused
-  const hovering = useRef(false);
   const loopWidth = useRef(0); // distance after which the content repeats
   const looping = Boolean(autoScroll);
 
@@ -38,16 +37,12 @@ export default function Rail({ children, label, autoScroll }: { children: ReactN
     const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting), { threshold: 0.2 });
     io.observe(el);
 
+    // Keeps gliding even with the mouse over it or reels playing; only a touch/drag
+    // or keyboard focus pauses it for a moment.
     const pause = (ms = 3000) => (hold.current = Math.max(hold.current, Date.now() + ms));
-    const enter = () => (hovering.current = true);
-    const leave = () => {
-      hovering.current = false;
-      pause(1200);
-    };
-    const touch = () => pause(4000);
-    const focus = () => pause(5000);
-    el.addEventListener("pointerenter", enter);
-    el.addEventListener("pointerleave", leave);
+    const touch = () => pause(2500);
+    const focus = () => pause(4000);
+    el.addEventListener("pointerdown", touch, { passive: true });
     el.addEventListener("touchstart", touch, { passive: true });
     el.addEventListener("focusin", focus);
 
@@ -60,7 +55,7 @@ export default function Rail({ children, label, autoScroll }: { children: ReactN
       const loop = loopWidth.current;
       // follow manual scrolling (trackpad / drag / buttons)
       if (Math.abs(el.scrollLeft - pos) > 2) pos = el.scrollLeft;
-      if (visible && !hovering.current && Date.now() >= hold.current && !document.hidden && loop > 0) {
+      if (visible && Date.now() >= hold.current && !document.hidden && loop > 0) {
         pos += autoScroll * dt;
         if (pos >= loop) pos -= loop; // invisible wrap: the copy looks identical
         el.scrollLeft = pos;
@@ -76,8 +71,7 @@ export default function Rail({ children, label, autoScroll }: { children: ReactN
       cancelAnimationFrame(raf);
       io.disconnect();
       window.removeEventListener("resize", measure);
-      el.removeEventListener("pointerenter", enter);
-      el.removeEventListener("pointerleave", leave);
+      el.removeEventListener("pointerdown", touch);
       el.removeEventListener("touchstart", touch);
       el.removeEventListener("focusin", focus);
     };
