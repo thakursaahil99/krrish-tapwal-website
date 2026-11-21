@@ -4,61 +4,95 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ArrowRightIcon } from "./icons";
 
 /**
- * Horizontal snap-scrolling rail with prev/next buttons and a progress bar.
- * `autoSlide` (ms) moves it one card at a time and wraps back to the start; it pauses
- * while the pointer is over it, while it's touched/focused, and when it's off screen.
+ * Horizontal rail with prev/next buttons and a progress bar.
+ *
+ * `autoScroll` (pixels per second) turns it into an endless conveyor belt: the cards
+ * glide continuously and repeat forever (a second copy follows the first, and the
+ * position wraps invisibly). It pauses while hovered, touched or focused, after the
+ * arrow buttons are used, and while it's off screen. Without it the rail snaps per card.
  */
-export default function Rail({ children, label, autoSlide }: { children: ReactNode; label: string; autoSlide?: number }) {
+export default function Rail({ children, label, autoScroll }: { children: ReactNode; label: string; autoScroll?: number }) {
   const ref = useRef<HTMLDivElement>(null);
+  const copy = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
   const [edges, setEdges] = useState({ start: true, end: false });
-  const hold = useRef(0); // timestamp until which auto-slide stays paused
+  const hold = useRef(0); // timestamp until which auto-scroll stays paused
   const hovering = useRef(false);
+  const loopWidth = useRef(0); // distance after which the content repeats
+  const looping = Boolean(autoScroll);
 
+  // Endless auto-scroll
   useEffect(() => {
     const el = ref.current;
-    if (!el || !autoSlide) return;
+    if (!el || !autoScroll) return;
+
+    const measure = () => {
+      const first = el.firstElementChild as HTMLElement | null;
+      const repeat = copy.current?.firstElementChild as HTMLElement | null;
+      if (first && repeat) loopWidth.current = repeat.getBoundingClientRect().left - first.getBoundingClientRect().left;
+    };
+    measure();
+    window.addEventListener("resize", measure);
+
     let visible = false;
-    const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting), { threshold: 0.3 });
+    const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting), { threshold: 0.2 });
     io.observe(el);
 
-    const pause = () => (hold.current = Date.now() + 4000);
+    const pause = (ms = 3000) => (hold.current = Math.max(hold.current, Date.now() + ms));
     const enter = () => (hovering.current = true);
     const leave = () => {
       hovering.current = false;
-      pause();
+      pause(1200);
     };
+    const touch = () => pause(4000);
+    const focus = () => pause(5000);
     el.addEventListener("pointerenter", enter);
     el.addEventListener("pointerleave", leave);
-    el.addEventListener("touchstart", pause, { passive: true });
-    el.addEventListener("focusin", pause);
+    el.addEventListener("touchstart", touch, { passive: true });
+    el.addEventListener("focusin", focus);
 
-    const tick = window.setInterval(() => {
-      if (!visible || hovering.current || Date.now() < hold.current || document.hidden) return;
-      const max = el.scrollWidth - el.clientWidth;
-      if (el.scrollLeft >= max - 8) {
-        el.scrollTo({ left: 0, behavior: "smooth" });
-        return;
+    let pos = el.scrollLeft;
+    let last = performance.now();
+    let raf = 0;
+    const frame = (now: number) => {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      const loop = loopWidth.current;
+      // follow manual scrolling (trackpad / drag / buttons)
+      if (Math.abs(el.scrollLeft - pos) > 2) pos = el.scrollLeft;
+      if (visible && !hovering.current && Date.now() >= hold.current && !document.hidden && loop > 0) {
+        pos += autoScroll * dt;
+        if (pos >= loop) pos -= loop; // invisible wrap: the copy looks identical
+        el.scrollLeft = pos;
+      } else if (loop > 0 && el.scrollLeft >= loop) {
+        pos = el.scrollLeft - loop;
+        el.scrollLeft = pos;
       }
-      const card = el.firstElementChild as HTMLElement | null;
-      const gap = parseFloat(getComputedStyle(el).columnGap) || 16;
-      el.scrollBy({ left: (card?.offsetWidth ?? el.clientWidth / 4) + gap, behavior: "smooth" });
-    }, autoSlide);
+      raf = requestAnimationFrame(frame);
+    };
+    raf = requestAnimationFrame(frame);
 
     return () => {
-      clearInterval(tick);
+      cancelAnimationFrame(raf);
       io.disconnect();
+      window.removeEventListener("resize", measure);
       el.removeEventListener("pointerenter", enter);
       el.removeEventListener("pointerleave", leave);
-      el.removeEventListener("touchstart", pause);
-      el.removeEventListener("focusin", pause);
+      el.removeEventListener("touchstart", touch);
+      el.removeEventListener("focusin", focus);
     };
-  }, [autoSlide]);
+  }, [autoScroll]);
 
+  // Progress bar + arrow states
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     const update = () => {
+      if (looping) {
+        const loop = loopWidth.current || el.scrollWidth / 2;
+        setProgress(((el.scrollLeft % loop) + loop) % loop / loop);
+        return;
+      }
       const max = el.scrollWidth - el.clientWidth;
       setProgress(max > 0 ? el.scrollLeft / max : 1);
       setEdges({ start: el.scrollLeft < 8, end: el.scrollLeft > max - 8 });
@@ -70,11 +104,21 @@ export default function Rail({ children, label, autoSlide }: { children: ReactNo
       el.removeEventListener("scroll", update);
       window.removeEventListener("resize", update);
     };
-  }, []);
+  }, [looping]);
 
   const go = (dir: 1 | -1) => {
-    hold.current = Date.now() + 6000; // manual navigation pauses auto-slide for a bit
-    ref.current?.scrollBy({ left: dir * ref.current.clientWidth * 0.8, behavior: "smooth" });
+    const el = ref.current;
+    if (!el) return;
+    hold.current = Date.now() + 2500; // arrow click pauses the belt briefly
+    const card = el.firstElementChild as HTMLElement | null;
+    const step = card ? card.offsetWidth + 16 : el.clientWidth * 0.8;
+    let target = el.scrollLeft + dir * step;
+    // in loop mode going back from the very start jumps into the copy first
+    if (looping && target < 0 && loopWidth.current) {
+      el.scrollLeft += loopWidth.current;
+      target += loopWidth.current;
+    }
+    el.scrollTo({ left: target, behavior: "smooth" });
   };
   const btn = "glass grid size-12 place-items-center rounded-full transition duration-300 hover:bg-neon hover:text-ink disabled:pointer-events-none disabled:opacity-30";
 
@@ -85,19 +129,27 @@ export default function Rail({ children, label, autoSlide }: { children: ReactNo
         role="region"
         aria-label={label}
         tabIndex={0}
-        className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-5 px-5 pb-2 sm:scroll-px-8 sm:px-8 lg:scroll-px-[max(3rem,calc((100vw_-_86rem)/2_+_3rem))] lg:px-[max(3rem,calc((100vw_-_86rem)/2_+_3rem))]"
+        className={`no-scrollbar flex gap-4 overflow-x-auto px-5 pb-2 sm:px-8 lg:px-[max(3rem,calc((100vw_-_86rem)/2_+_3rem))] ${
+          looping ? "" : "snap-x snap-mandatory scroll-px-5 sm:scroll-px-8 lg:scroll-px-[max(3rem,calc((100vw_-_86rem)/2_+_3rem))]"
+        }`}
       >
         {children}
+        {/* identical second set so the belt can wrap without a visible jump */}
+        {looping && (
+          <div ref={copy} className="contents" aria-hidden="true" inert>
+            {children}
+          </div>
+        )}
       </div>
       <div className="container-x mt-8 flex items-center gap-6">
         <div className="h-px flex-1 overflow-hidden bg-line">
-          <div className="h-full origin-left bg-gradient-to-r from-neon to-gold transition-transform duration-300" style={{ transform: `scaleX(${Math.max(0.08, progress)})` }} />
+          <div className="h-full origin-left bg-gradient-to-r from-neon to-gold" style={{ transform: `scaleX(${Math.max(0.04, progress)})` }} />
         </div>
         <div className="flex gap-2">
-          <button type="button" className={btn} onClick={() => go(-1)} disabled={edges.start} aria-label="Scroll back">
+          <button type="button" className={btn} onClick={() => go(-1)} disabled={!looping && edges.start} aria-label="Scroll back">
             <ArrowRightIcon width={18} height={18} className="rotate-180" />
           </button>
-          <button type="button" className={btn} onClick={() => go(1)} disabled={edges.end} aria-label="Scroll forward">
+          <button type="button" className={btn} onClick={() => go(1)} disabled={!looping && edges.end} aria-label="Scroll forward">
             <ArrowRightIcon width={18} height={18} />
           </button>
         </div>

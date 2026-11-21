@@ -399,7 +399,7 @@ export default async function HomePage() {
           </SectionHeading>
         </div>
         <Reveal>
-          <Rail label="YouTube Shorts" autoSlide={3000}>
+          <Rail label="YouTube Shorts" autoScroll={45}>
             {shorts.slice(0, 12).map((s) => (
               <ShortCard key={s.id} short={s} className="w-[68vw] sm:w-64 lg:w-72" />
             ))}
