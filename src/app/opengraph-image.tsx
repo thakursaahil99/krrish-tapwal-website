@@ -33,7 +33,7 @@ export default async function OpengraphImage() {
           width: "100%",
           height: "100%",
           display: "flex",
-          background: "radial-gradient(circle at 70% 30%, #4a4a4a, #303030 55%, #262626)",
+          background: "radial-gradient(circle at 75% 25%, #2a1d52, #0e1019 55%, #07080f)",
           color: "#ffffff",
           padding: 64,
           alignItems: "center",
@@ -41,18 +41,18 @@ export default async function OpengraphImage() {
         }}
       >
         <div style={{ display: "flex", flexDirection: "column", maxWidth: 640 }}>
-          <div style={{ fontSize: 24, letterSpacing: 4, color: "#e76543", textTransform: "uppercase" }}>{site.role}</div>
+          <div style={{ fontSize: 24, letterSpacing: 4, color: "#ff7a2f", textTransform: "uppercase" }}>{site.role}</div>
           <div style={{ fontSize: 120, fontWeight: 800, lineHeight: 0.95, marginTop: 24, letterSpacing: -2, textTransform: "uppercase" }}>Krrish</div>
           <div style={{ fontSize: 120, fontWeight: 800, lineHeight: 0.95, letterSpacing: -2, textTransform: "uppercase" }}>Tapwal</div>
-          <div style={{ fontSize: 30, color: "#e76543", marginTop: 32 }}>{`${site.brand} · ${site.location.region}`}</div>
-          <div style={{ fontSize: 24, color: "#bdbdbd", marginTop: 12 }}>krrishtapwal.space</div>
+          <div style={{ fontSize: 30, color: "#ff7a2f", marginTop: 32 }}>{`${site.brand} · ${site.location.region}`}</div>
+          <div style={{ fontSize: 24, color: "#9599ad", marginTop: 12 }}>krrishtapwal.space</div>
         </div>
         <img
           src={src}
           width={400}
           height={400}
           alt=""
-          style={{ borderRadius: 400, border: "10px solid #e76543", objectFit: "cover" }}
+          style={{ borderRadius: 400, border: "10px solid #ff7a2f", objectFit: "cover" }}
         />
       </div>
     ),

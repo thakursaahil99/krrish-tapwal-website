@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import ProductCard from "@/components/ProductCard";
 import Reveal from "@/components/Reveal";
-import { YouTubeIcon } from "@/components/icons";
-import { JsonLd, PageHero, SectionTitle } from "@/components/ui";
+import { BellIcon, MountainIcon, SparkIcon, YouTubeIcon } from "@/components/icons";
+import { JsonLd, PageHero, SectionHeading } from "@/components/ui";
 import { products } from "@/data/shop";
 import { site } from "@/data/site";
 import { breadcrumbSchema, graph } from "@/lib/schema";
+import { thumb } from "@/lib/youtube";
 
 export const metadata: Metadata = {
   title: "Shop",
@@ -17,9 +18,9 @@ export const metadata: Metadata = {
 };
 
 const promises = [
-  { t: "Sourced locally", d: "Products from Himachal's villages and local makers.", bg: "bg-teal" },
-  { t: "Quality first", d: "Thoughtfully selected products with clear information.", bg: "bg-violet" },
-  { t: "Community focused", d: "Early access and updates for subscribers.", bg: "bg-charcoal" },
+  { t: "Sourced locally", d: "Products from Himachal's villages and local makers.", Icon: MountainIcon },
+  { t: "Quality first", d: "Thoughtfully selected products with clear information.", Icon: SparkIcon },
+  { t: "Community first", d: "Early access and drop alerts for subscribers.", Icon: BellIcon },
 ];
 
 export default function ShopPage() {
@@ -35,26 +36,41 @@ export default function ShopPage() {
         )}
       />
 
-      <PageHero title="Merch Store" subtitle="Launching soon">
-        <p>{site.brand} merchandise and selected products from Himachal Pradesh, delivered to your home.</p>
+      <PageHero
+        eyebrow="Store · Launching soon"
+        image={thumb("HAmoqYBhXBA", "max")}
+        title={
+          <>
+            The <span className="text-glow">drop</span>
+          </>
+        }
+      >
+        <p>{site.brand} merch and handpicked Himachali goodies — delivered from the hills to your home.</p>
       </PageHero>
 
-      <section className="bg-coral pb-16">
-        <div className="container-x grid gap-2 sm:grid-cols-3">
-          {promises.map((p, i) => (
-            <Reveal key={p.t} delay={i * 80} className={`p-6 text-white ${p.bg}`}>
-              <p className="text-lg font-semibold">{p.t}</p>
-              <p className="mt-1 text-sm font-light text-white/90">{p.d}</p>
+      <section className="pb-20" aria-label="Store promises">
+        <div className="container-x grid gap-4 sm:grid-cols-3">
+          {promises.map(({ t, d, Icon }, i) => (
+            <Reveal key={t} delay={i * 80} className="glass glow-border spot group flex items-start gap-4 rounded-3xl p-6">
+              <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-neon/10 text-neon ring-1 ring-neon/30 transition duration-500 group-hover:bg-neon group-hover:text-ink">
+                <Icon width={22} height={22} />
+              </span>
+              <span>
+                <span className="block font-display text-lg font-bold tracking-tight">{t}</span>
+                <span className="mt-1 block text-sm leading-relaxed text-stone">{d}</span>
+              </span>
             </Reveal>
           ))}
         </div>
       </section>
 
-      {categories.map((cat) => (
-        <section key={cat} className="pt-20 md:pt-24" aria-labelledby={`cat-${cat}`}>
+      {categories.map((cat, ci) => (
+        <section key={cat} className="pb-24" aria-labelledby={`cat-${ci}`}>
           <div className="container-x">
-            <SectionTitle id={`cat-${cat}`}>{cat}</SectionTitle>
-            <div className="grid grid-cols-2 gap-x-5 gap-y-10 lg:grid-cols-3 lg:gap-x-8">
+            <SectionHeading index={`0${ci + 1}`} eyebrow="Collection" id={`cat-${ci}`}>
+              {cat}
+            </SectionHeading>
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
               {products
                 .filter((p) => p.category === cat)
                 .map((p, i) => (
@@ -65,13 +81,19 @@ export default function ShopPage() {
         </section>
       ))}
 
-      <section className="py-20 md:py-28">
-        <div className="container-x text-center">
-          <h2 className="section-title">Stay Updated</h2>
-          <p className="mx-auto mt-4 max-w-lg text-muted">The store launch will be announced on YouTube. Subscribe to be among the first to know.</p>
-          <a href={site.youtube.subscribeUrl} target="_blank" rel="noopener noreferrer" className="btn btn-coral mt-8 !px-10">
-            <YouTubeIcon width={18} height={18} /> Subscribe for Updates
-          </a>
+      <section className="pb-28 md:pb-40">
+        <div className="container-x">
+          <Reveal variant="scale" className="glass glow-border relative overflow-hidden rounded-[2.5rem] px-6 py-16 text-center sm:px-12 md:py-24">
+            <div className="absolute left-1/2 top-0 h-64 w-[40rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-neon/20 blur-[100px]" aria-hidden="true" />
+            <p className="eyebrow relative">Get notified</p>
+            <h2 className="display-lg relative mx-auto mt-6 max-w-3xl">
+              Be first in line for the <span className="text-glow">launch</span>
+            </h2>
+            <p className="relative mx-auto mt-6 max-w-lg text-lg text-stone">The store launch will be announced on YouTube. Subscribe and hit the bell.</p>
+            <a href={site.youtube.subscribeUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary relative mt-10">
+              <YouTubeIcon width={18} height={18} /> Subscribe for updates
+            </a>
+          </Reveal>
         </div>
       </section>
     </>

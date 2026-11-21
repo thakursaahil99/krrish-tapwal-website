@@ -107,6 +107,23 @@ export const BagIcon = (p: P) => (
     <path d="M9 8V6a3 3 0 0 1 6 0v2" />
   </svg>
 );
+export const CompassIcon = (p: P) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinejoin="round" {...base(p)}>
+    <circle cx="12" cy="12" r="9.5" />
+    <path d="m15.5 8.5-2 5-5 2 2-5 5-2Z" />
+  </svg>
+);
+export const CodeIcon = (p: P) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" {...base(p)}>
+    <path d="m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16" />
+  </svg>
+);
+export const ChartIcon = (p: P) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" {...base(p)}>
+    <path d="M3 3v18h18" />
+    <path d="m7 15 4-4 3 3 6-7" />
+  </svg>
+);
 export const BellIcon = (p: P) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinejoin="round" {...base(p)}>
     <path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15L6 16Z" />

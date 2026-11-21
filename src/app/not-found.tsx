@@ -9,14 +9,20 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
   return (
-    <>
-      <PageHero title="Trail Not Found" subtitle="404 · Page not found">
-        <p>This page may have moved or no longer exists. Return to the homepage to continue exploring.</p>
-        <Link href="/" className="btn btn-coral mt-8">
-          Return Home
-        </Link>
-      </PageHero>
-      <div className="h-24 bg-coral" />
-    </>
+    <PageHero
+      eyebrow="Error 404 · Signal lost"
+      image="/images/krrish-tapwal.jpg"
+      imagePosition="76% center"
+      title={
+        <>
+          Trail <span className="text-glow">not found</span>
+        </>
+      }
+    >
+      <p>This page may have moved or no longer exists. Head back to base camp and keep exploring.</p>
+      <Link href="/" className="btn btn-primary mt-8">
+        Return home
+      </Link>
+    </PageHero>
   );
 }

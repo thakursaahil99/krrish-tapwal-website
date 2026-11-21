@@ -5,7 +5,8 @@ const FEED_URL = `https://www.youtube.com/feeds/videos.xml?channel_id=${site.you
 // Har 15 minute mein YouTube se nayi uploads + stats check hote hain (ISR).
 // Note: page files mein `export const revalidate = 900` bhi isi value se match karta hai.
 export const YT_REVALIDATE = 900;
-const PROFILE_IMAGE_FALLBACK = "/images/krrish-tapwal-portrait.jpg";
+// YouTube DP ki local copy — YouTube na mile to yeh dikhegi (favicon bhi isi se banta hai)
+const PROFILE_IMAGE_FALLBACK = "/images/krrish-avatar.jpg";
 const PROFILE_PAGE_URL = `https://www.youtube.com/${site.youtube.handle}`;
 
 type FeedEntry = {
@@ -181,7 +182,8 @@ export async function getChannelContent(): Promise<{ videos: Video[]; shorts: Sh
   return { videos: videos.sort(byDateDesc), shorts: shorts.sort(byDateDesc) };
 }
 
-const thumbFile = { hq: "hqdefault", mq: "mqdefault", sd: "sddefault", max: "maxresdefault" } as const;
+// "oar" = Shorts ka original portrait (9:16) frame
+const thumbFile = { hq: "hqdefault", mq: "mqdefault", sd: "sddefault", max: "maxresdefault", oar: "oardefault" } as const;
 export const thumb = (id: string, size: keyof typeof thumbFile = "hq") => `https://i.ytimg.com/vi/${id}/${thumbFile[size]}.jpg`;
 
 export const watchUrl = (id: string) => `https://www.youtube.com/watch?v=${id}`;

@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import CountUp from "@/components/CountUp";
 import Reveal from "@/components/Reveal";
 import Socials from "@/components/Socials";
-import { MapPinIcon } from "@/components/icons";
-import { JsonLd, PageHero, PlayLabel, SectionTitle } from "@/components/ui";
+import Thumb from "@/components/Thumb";
+import { ArrowUpRightIcon, BikeIcon, ChartIcon, CodeIcon, CompassIcon, MapPinIcon } from "@/components/icons";
+import { JsonLd, PageHero, PlayBadge, SectionHeading, StatTile } from "@/components/ui";
 import { site } from "@/data/site";
-import { garage, places, timeline } from "@/data/videos";
-import { compactNumber } from "@/lib/format";
+import { places, timeline } from "@/data/videos";
 import { breadcrumbSchema, faqSchema, graph, profilePageSchema } from "@/lib/schema";
 import { getChannelProfileImage, getChannelStats, thumb, watchUrl } from "@/lib/youtube";
 
@@ -44,16 +45,10 @@ const faqs = [
   },
 ];
 
-const tileColors = ["bg-teal", "bg-coral", "bg-violet", "bg-leaf", "bg-mustard", "bg-teal"];
+const identityIcons = [CompassIcon, CodeIcon, ChartIcon, BikeIcon];
 
 export default async function AboutPage() {
   const [live, profileImage] = await Promise.all([getChannelStats(), getChannelProfileImage()]);
-  const stats = [
-    { k: "Views", v: compactNumber(live.views) },
-    { k: "Subscribers", v: compactNumber(live.subscribers) },
-    { k: "Uploads", v: `${live.videos}+` },
-    { k: "Since", v: `${site.stats.since}` },
-  ];
 
   return (
     <>
@@ -69,94 +64,122 @@ export default async function AboutPage() {
       />
 
       <PageHero
+        eyebrow="About · Creator file"
+        image={thumb("QHAmMv4mdRE", "max")}
+        imagePosition="center 30%"
         title={
           <>
-            About
+            The <span className="text-glow">human</span>
             <br />
-            {site.name}
+            behind the lens
           </>
         }
-        subtitle={site.role}
         aside={
-          <div className="relative mx-auto aspect-square w-full max-w-xs overflow-hidden rounded-full border-[6px] border-coral">
-            <Image src={profileImage} alt="Current YouTube profile photo of Krrish Tapwal" fill priority sizes="320px" className="object-cover object-top" />
+          <div className="glass glow-border rounded-[2rem] p-6">
+            <div className="flex items-center gap-4">
+              <span className="relative size-20 shrink-0 overflow-hidden rounded-2xl ring-1 ring-line">
+                <Image src={profileImage} alt="Current YouTube profile photo of Krrish Tapwal" fill sizes="80px" className="object-cover object-top" />
+              </span>
+              <div>
+                <p className="font-display text-xl font-bold tracking-tight">{site.name}</p>
+                <p className="hud mt-1 text-neon">{site.role}</p>
+                <p className="mt-2 inline-flex items-center gap-1.5 text-sm text-stone">
+                  <MapPinIcon width={14} height={14} /> {site.location.area}, HP
+                </p>
+              </div>
+            </div>
+            <Socials className="mt-6" />
           </div>
         }
       >
         <p>{site.shortBio}</p>
-        <p className="mt-4 inline-flex items-center gap-2 font-normal text-white/80">
-          <MapPinIcon width={16} height={16} className="text-coral" /> {site.location.area}, {site.location.region}, {site.location.country}
-        </p>
       </PageHero>
 
-      {/* Story + stats (coral band) */}
-      <section className="bg-coral pb-20 text-white md:pb-28">
-        <div className="container-x grid gap-12 pt-6 lg:grid-cols-[1fr_1.4fr] lg:gap-20">
-          <Reveal>
-            <h2 className="text-4xl font-bold sm:text-5xl">My Story</h2>
-            <dl className="mt-10 grid grid-cols-2 gap-3">
-              {stats.map((s) => (
-                <div key={s.k} className="bg-white/10 p-5">
-                  <dd className="text-3xl font-bold tabular-nums">{s.v}</dd>
-                  <dt className="mt-1 text-xs font-medium uppercase tracking-wide text-white/80">{s.k}</dt>
-                </div>
-              ))}
+      {/* Story */}
+      <section className="py-28 md:py-40" aria-labelledby="story-title">
+        <div className="container-x grid gap-14 lg:grid-cols-[1fr_1.3fr] lg:gap-20">
+          <div className="lg:sticky lg:top-28 lg:self-start">
+            <Reveal variant="clip" className="glow-border relative aspect-[4/5] overflow-hidden rounded-[2rem]">
+              <Image src="/images/krrish-tapwal-portrait.jpg" alt={`Portrait of ${site.name} by a Himalayan lake`} fill sizes="(min-width: 1024px) 40vw, 100vw" className="object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-transparent to-transparent" />
+              <p className="hud absolute bottom-5 left-5 text-snow/80">// est. {site.stats.since}</p>
+            </Reveal>
+            <dl className="mt-4 grid grid-cols-2 gap-4">
+              <StatTile label="Subscribers">
+                <CountUp value={live.subscribers} />
+              </StatTile>
+              <StatTile label="Views">
+                <span className="text-neon">
+                  <CountUp value={live.views} compact />
+                </span>
+              </StatTile>
+              <StatTile label="Uploads">
+                <CountUp value={live.videos} />+
+              </StatTile>
+              <StatTile label="Since">{site.stats.since}</StatTile>
             </dl>
-            <p className="mt-3 text-xs text-white/75">Live YouTube statistics · refreshed every 15 minutes</p>
-            <Socials variant="light" className="mt-8" />
-          </Reveal>
-          <div className="space-y-5 text-[0.98rem] font-extralight leading-relaxed">
-            {site.longBio.map((para, i) => (
-              <Reveal key={i} delay={i * 70} as="p" className={i === 0 ? "text-lg font-light" : ""}>
-                {para}
-              </Reveal>
-            ))}
+            <p className="hud mt-4 text-muted">Live YouTube stats · refreshed every 15 min</p>
+          </div>
+
+          <div>
+            <Reveal>
+              <p className="eyebrow">My story</p>
+            </Reveal>
+            <Reveal delay={80} variant="blur">
+              <h2 id="story-title" className="display-lg mt-6">
+                From code to <span className="text-glow">cliffside</span> trails.
+              </h2>
+            </Reveal>
+            <div className="mt-10 space-y-7 text-lg leading-relaxed text-stone">
+              {site.longBio.map((para, i) => (
+                <Reveal key={i} delay={i * 60} as="p" className={i === 0 ? "text-2xl leading-relaxed text-snow" : ""}>
+                  {para}
+                </Reveal>
+              ))}
+            </div>
+
+            <div className="mt-14 grid gap-4 sm:grid-cols-2">
+              {site.identities.map((id, i) => {
+                const Icon = identityIcons[i];
+                return (
+                  <Reveal key={id.title} delay={i * 70} className="glass glow-border spot group rounded-3xl p-6">
+                    <span className="grid size-12 place-items-center rounded-2xl bg-snow/5 text-neon ring-1 ring-line transition duration-500 group-hover:rotate-[-8deg] group-hover:bg-neon group-hover:text-ink">
+                      <Icon width={22} height={22} />
+                    </span>
+                    <h3 className="mt-5 font-display text-lg font-bold tracking-tight">{id.title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-stone">{id.text}</p>
+                  </Reveal>
+                );
+              })}
+            </div>
           </div>
         </div>
       </section>
 
       {/* Places explored */}
-      <section className="py-20 md:py-28" aria-labelledby="places-title">
+      <section className="pb-28 md:pb-40" aria-labelledby="places-title">
         <div className="container-x">
-          <SectionTitle id="places-title" intro="Remarkable places across Mandi and Sarkaghat, from historic forts to hilltop temples.">
-            Places I&apos;ve Explored
-          </SectionTitle>
-          <div className="grid gap-2 sm:grid-cols-2">
+          <SectionHeading index="01" eyebrow="Explored" id="places-title" intro="Remarkable places across Mandi and Sarkaghat, from historic forts to hilltop temples.">
+            Places I&apos;ve <span className="text-glow">explored</span>
+          </SectionHeading>
+          <div className="grid gap-5 sm:grid-cols-2">
             {places.map((p, i) => (
-              <Reveal key={p.name} delay={(i % 2) * 80} as="article">
-                <a href={watchUrl(p.videoId)} target="_blank" rel="noopener noreferrer" className={`group relative block aspect-video overflow-hidden ${tileColors[i]}`}>
-                  <Image src={thumb(p.videoId, "hq")} alt={`${p.name}, ${p.area}`} fill sizes="(min-width: 640px) 50vw, 100vw" className="object-cover transition duration-700 group-hover:scale-105" />
-                  <span className="absolute inset-0 bg-charcoal/50 transition group-hover:bg-charcoal/35" />
-                  <span className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-6 text-center text-white">
-                    <span className="text-2xl font-bold sm:text-3xl">{p.name}</span>
-                    <span className="inline-flex items-center gap-1.5 text-sm font-light">
-                      <MapPinIcon width={14} height={14} /> {p.area}
+              <Reveal key={p.name} delay={(i % 2) * 100} variant="scale" as="article">
+                <a href={watchUrl(p.videoId)} target="_blank" rel="noopener noreferrer" className="glow-border group card-zoom relative block aspect-[4/3] overflow-hidden rounded-[2rem] bg-panel-2">
+                  <Thumb id={p.videoId} alt={`${p.name}, ${p.area}`} sizes="(min-width: 640px) 50vw, 100vw" />
+                  <span className="absolute inset-0 bg-gradient-to-t from-ink via-ink/30 to-transparent" />
+                  <span className="absolute inset-0 grid place-items-center opacity-0 transition duration-500 group-hover:opacity-100">
+                    <PlayBadge />
+                  </span>
+                  <span className="hud absolute left-5 top-5 rounded-full bg-ink/70 px-3 py-1.5 backdrop-blur">0{i + 1}</span>
+                  <span className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
+                    <span className="hud inline-flex items-center gap-1.5 text-neon">
+                      <MapPinIcon width={12} height={12} /> {p.area}
                     </span>
-                    <span className="mt-3">
-                      <PlayLabel label="Watch the Journey" />
-                    </span>
+                    <span className="mt-2 block font-display text-2xl font-bold tracking-tight sm:text-3xl">{p.name}</span>
+                    <span className="mt-2 block max-w-md text-sm leading-relaxed text-snow/70">{p.note}</span>
                   </span>
                 </a>
-                <p className="mt-3 text-sm text-muted">{p.note}</p>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Garage */}
-      <section className="bg-white py-20 md:py-28" aria-labelledby="garage-title">
-        <div className="container-x">
-          <SectionTitle id="garage-title">The Garage</SectionTitle>
-          <div className="grid gap-8 md:grid-cols-2">
-            {garage.map((g, i) => (
-              <Reveal key={g.name} delay={i * 90} as="article" className="text-center">
-                <a href={watchUrl(g.videoId)} target="_blank" rel="noopener noreferrer" className={`group relative block aspect-video overflow-hidden ${i ? "bg-teal" : "bg-coral"}`}>
-                  <Image src={thumb(g.videoId, "hq")} alt={`${g.name} ${g.variant}`} fill sizes="(min-width: 768px) 50vw, 100vw" className="object-cover transition duration-700 group-hover:scale-105" />
-                </a>
-                <h3 className="mt-5 text-2xl font-semibold">{g.name}</h3>
-                <p className="mt-1 text-sm font-semibold uppercase tracking-wide text-coral">{g.variant}</p>
-                <p className="mx-auto mt-2 max-w-sm text-sm text-muted">{g.note}</p>
               </Reveal>
             ))}
           </div>
@@ -164,15 +187,20 @@ export default async function AboutPage() {
       </section>
 
       {/* Timeline */}
-      <section className="py-20 md:py-28" aria-labelledby="journey-title">
+      <section className="pb-28 md:pb-40" aria-labelledby="journey-title">
         <div className="container-x">
-          <SectionTitle id="journey-title">The Journey So Far</SectionTitle>
-          <ol className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          <SectionHeading index="02" eyebrow="Changelog" id="journey-title">
+            The journey <span className="text-glow">so far</span>
+          </SectionHeading>
+          <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {timeline.map((t, i) => (
-              <Reveal key={t.title} as="li" delay={(i % 4) * 70} className={`p-6 text-white ${["bg-coral", "bg-teal", "bg-violet", "bg-charcoal"][i % 4]}`}>
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/80">{t.date}</p>
-                <h3 className="mt-2 text-lg font-semibold leading-snug">{t.title}</h3>
-                <p className="mt-2 text-sm font-light text-white/90">{t.text}</p>
+              <Reveal key={t.title} as="li" delay={(i % 4) * 70} className="glass glow-border spot flex flex-col rounded-3xl p-6">
+                <span className="flex items-center justify-between">
+                  <span className="hud text-neon">{t.date}</span>
+                  <span className="hud text-muted">v{i + 1}.0</span>
+                </span>
+                <h3 className="mt-6 font-display text-lg font-bold leading-snug tracking-tight">{t.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-stone">{t.text}</p>
               </Reveal>
             ))}
           </ol>
@@ -180,24 +208,30 @@ export default async function AboutPage() {
       </section>
 
       {/* FAQ */}
-      <section className="pb-20 md:pb-28" aria-labelledby="faq-title">
-        <div className="container-x">
-          <SectionTitle id="faq-title">Questions About Me</SectionTitle>
-          <div className="mx-auto max-w-3xl divide-y divide-line border-y border-line">
-            {faqs.map((f) => (
-              <details key={f.q} className="group py-5">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-6 text-lg font-semibold [&::-webkit-details-marker]:hidden">
-                  {f.q}
-                  <span className="grid size-8 shrink-0 place-items-center rounded-full bg-coral text-white transition group-open:rotate-45">+</span>
-                </summary>
-                <p className="mt-3 text-muted">{f.a}</p>
-              </details>
-            ))}
+      <section className="pb-28 md:pb-40" aria-labelledby="faq-title">
+        <div className="container-x grid gap-12 lg:grid-cols-[1fr_1.5fr]">
+          <div>
+            <SectionHeading index="03" eyebrow="FAQ" id="faq-title">
+              Questions, <span className="text-glow">answered</span>
+            </SectionHeading>
+            <Reveal>
+              <Link href="/videos" className="btn btn-primary">
+                Watch my videos <ArrowUpRightIcon width={16} height={16} className="btn-arrow" />
+              </Link>
+            </Reveal>
           </div>
-          <div className="mt-12 text-center">
-            <Link href="/videos" className="btn btn-coral !px-10">
-              Watch My Videos
-            </Link>
+          <div className="space-y-3">
+            {faqs.map((f, i) => (
+              <Reveal key={f.q} delay={i * 60}>
+                <details className="glass glow-border group rounded-2xl px-6 py-5 open:bg-snow/[0.07]">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-6 text-lg font-semibold [&::-webkit-details-marker]:hidden">
+                    {f.q}
+                    <span className="grid size-9 shrink-0 place-items-center rounded-full bg-snow/10 text-xl transition duration-500 group-open:rotate-45 group-open:bg-neon group-open:text-ink">+</span>
+                  </summary>
+                  <p className="mt-4 leading-relaxed text-stone">{f.a}</p>
+                </details>
+              </Reveal>
+            ))}
           </div>
         </div>
       </section>

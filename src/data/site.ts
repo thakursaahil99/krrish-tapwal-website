@@ -18,6 +18,26 @@ export const site = {
   brand: "XploreWithKrrish",
   role: "Himachal Explorer",
   tagline: "Exploring Himachal through its landscapes, heritage, road trips, and stories.",
+
+  // Homepage hero copy
+  hero: {
+    kicker: "Sarkaghat · Mandi · Himachal Pradesh",
+    lead: "Forgotten forts, hilltop temples, misty mountain roads — and the people who make every trail feel like home. Pahadi by heart, engineer by trade.",
+    /**
+     * Hero ke peeche chalne wali (muted, faded) YouTube video.
+     * `id` = video ID (youtube.com/watch?v=YAHAN_WALA), `start` = kitne second se shuru ho.
+     * Hero ki photo apne aap aapki latest YouTube profile photo hoti hai.
+     */
+    bgVideo: { id: "sY2h1Gsx_ZI", start: 60 },
+  },
+
+  // "Who I am" chips + cards (About & Home)
+  identities: [
+    { title: "Explorer", text: "Chasing hidden trails, old forts and temples above the clouds across Mandi district." },
+    { title: "CSE Engineer", text: "A Computer Science Engineering professional who loves building with technology." },
+    { title: "Data Scientist", text: "Turning numbers into insight by day — and footage into stories by night." },
+    { title: "Rider", text: "Mountain mornings on a Meteor 350, family road trips in the Scorpio Classic." },
+  ],
   location: {
     region: "Himachal Pradesh",
     area: "Sarkaghat, Mandi",
@@ -98,8 +118,8 @@ export type SocialKey = keyof typeof site.socials;
 export const navLinks = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About" },
-  { href: "/#gallery", label: "Gallery" },
   { href: "/videos", label: "Videos" },
+  { href: "/#gallery", label: "Gallery" },
   { href: "/shop", label: "Shop" },
-  { href: "#follow", label: "Follow Me" },
+  { href: "#follow", label: "Contact" },
 ] as const;

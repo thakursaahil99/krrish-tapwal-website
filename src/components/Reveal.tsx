@@ -2,15 +2,20 @@
 
 import { useEffect, useRef, useState, type ElementType, type ReactNode } from "react";
 
+export type RevealVariant = "up" | "left" | "right" | "scale" | "blur" | "clip";
+
+/** Animates its children in when they scroll into view. */
 export default function Reveal({
   children,
   as: Tag = "div",
   delay = 0,
+  variant = "up",
   className = "",
 }: {
   children: ReactNode;
   as?: ElementType;
   delay?: number;
+  variant?: RevealVariant;
   className?: string;
 }) {
   const ref = useRef<HTMLElement>(null);
@@ -26,14 +31,19 @@ export default function Reveal({
           io.disconnect();
         }
       },
-      { rootMargin: "0px 0px -10% 0px", threshold: 0.1 },
+      { rootMargin: "0px 0px -8% 0px", threshold: 0.08 },
     );
     io.observe(el);
     return () => io.disconnect();
   }, []);
 
   return (
-    <Tag ref={ref} className={`reveal${visible ? " is-visible" : ""} ${className}`} style={{ "--reveal-delay": `${delay}ms` } as React.CSSProperties}>
+    <Tag
+      ref={ref}
+      data-variant={variant}
+      className={`reveal${visible ? " is-visible" : ""} ${className}`}
+      style={{ "--reveal-delay": `${delay}ms` } as React.CSSProperties}
+    >
       {children}
     </Tag>
   );

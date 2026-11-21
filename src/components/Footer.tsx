@@ -2,82 +2,133 @@ import Image from "next/image";
 import Link from "next/link";
 import { site } from "@/data/site";
 import { getChannelProfileImage } from "@/lib/youtube";
-import Socials from "./Socials";
+import { ArrowUpRightIcon, MapPinIcon, YouTubeIcon } from "./icons";
+import Marquee from "./Marquee";
+import Reveal from "./Reveal";
+import Socials, { activeSocials } from "./Socials";
 
 export default async function Footer() {
   const year = new Date().getFullYear();
   const profileImage = await getChannelProfileImage();
-  const handle = site.socials.instagram ? `@${site.socials.instagram.replace(/\/+$/, "").split("/").pop()}` : site.youtube.handle;
 
   return (
-    <footer>
-      {/* ===== Follow band (teal) ===== */}
-      <section id="follow" className="scroll-mt-24 overflow-hidden bg-teal text-white" aria-labelledby="follow-title">
-        <div className="container-x grid items-end gap-10 pt-16 md:grid-cols-2 md:gap-16 md:pt-20">
-          <div className="relative mx-auto aspect-[4/5] w-full max-w-sm overflow-hidden rounded-t-[10rem] bg-teal-dark/40 md:order-none">
-            <Image
-              src={profileImage}
-              alt={`${site.name}, ${site.role}`}
-              fill
-              sizes="(min-width: 768px) 24rem, 80vw"
-              className="object-cover object-top"
-            />
-          </div>
+    <footer className="relative overflow-hidden bg-ink">
+      {/* ===== Big CTA ===== */}
+      <section id="follow" className="relative scroll-mt-24 border-t border-line pt-24 md:pt-32" aria-labelledby="follow-title">
+        <div className="pointer-events-none absolute left-1/2 top-0 h-[36rem] w-[60rem] -translate-x-1/2 -translate-y-1/3 rounded-full bg-neon/15 blur-[120px]" aria-hidden="true" />
+        <div className="container-x relative">
+          <div className="grid items-center gap-14 lg:grid-cols-[1.3fr_1fr]">
+            <div>
+              <Reveal>
+                <p className="eyebrow">Follow the journey</p>
+              </Reveal>
+              <Reveal delay={80} variant="blur">
+                <h2 id="follow-title" className="display-lg mt-6">
+                  Chalo, let&apos;s explore <span className="text-glow">Himachal</span> together.
+                </h2>
+              </Reveal>
+              <Reveal delay={160}>
+                <p className="mt-6 max-w-lg text-lg leading-relaxed text-stone">
+                  New trails, temples and road trips every month. Subscribe on YouTube, say hi on Instagram, or reach out for collaborations and travel features.
+                </p>
+              </Reveal>
+              <Reveal delay={220} className="mt-10 flex flex-wrap gap-3">
+                <a href={site.youtube.subscribeUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
+                  <YouTubeIcon width={18} height={18} /> Subscribe on YouTube
+                </a>
+                {site.socials.instagram && (
+                  <a href={site.socials.instagram} target="_blank" rel="noopener noreferrer me" className="btn btn-ghost">
+                    Instagram <ArrowUpRightIcon width={16} height={16} className="btn-arrow" />
+                  </a>
+                )}
+              </Reveal>
+            </div>
 
-          <div className="pb-16 md:pb-24">
-            <h2 id="follow-title" className="text-4xl font-bold sm:text-5xl">Follow Me</h2>
-            <Socials variant="light" className="mt-8" />
-
-            <h3 className="mt-12 text-2xl font-semibold">Collaborations</h3>
-            <dl className="mt-5 space-y-5 text-[0.95rem]">
-              <div>
-                <dt className="font-light text-white/85">For business inquiries</dt>
-                <dd>
-                  {site.email ? (
-                    <a href={`mailto:${site.email}`} className="font-medium hover:underline">
-                      {site.email}
-                    </a>
-                  ) : (
-                    <a href={site.youtube.url} target="_blank" rel="noopener noreferrer" className="font-medium hover:underline">
-                      Message me on YouTube · {site.youtube.handle}
-                    </a>
-                  )}
-                </dd>
+            {/* Profile card */}
+            <Reveal variant="scale" delay={150}>
+              <div className="glass relative overflow-hidden rounded-[2rem] p-6 sm:p-8">
+                <div className="flex items-center gap-5">
+                  <span className="relative size-20 shrink-0 overflow-hidden rounded-full ring-2 ring-neon ring-offset-4 ring-offset-panel">
+                    <Image src={profileImage} alt={`${site.name}, ${site.role}`} fill sizes="80px" className="object-cover object-top" />
+                  </span>
+                  <div>
+                    <p className="font-display text-2xl font-bold tracking-tight">{site.name}</p>
+                    <p className="text-sm text-stone">{site.youtube.handle}</p>
+                  </div>
+                </div>
+                <dl className="mt-8 space-y-4 text-sm">
+                  <div className="flex items-start justify-between gap-4 border-b border-line pb-4">
+                    <dt className="text-stone">Business & collabs</dt>
+                    <dd className="text-right font-semibold">
+                      {site.email ? (
+                        <a href={`mailto:${site.email}`} className="link-underline">
+                          {site.email}
+                        </a>
+                      ) : (
+                        <a href={site.youtube.url} target="_blank" rel="noopener noreferrer" className="link-underline">
+                          Message on YouTube
+                        </a>
+                      )}
+                    </dd>
+                  </div>
+                  <div className="flex items-start justify-between gap-4 border-b border-line pb-4">
+                    <dt className="text-stone">Based in</dt>
+                    <dd className="inline-flex items-center gap-1.5 text-right font-semibold">
+                      <MapPinIcon width={15} height={15} className="text-neon" />
+                      {site.location.area}, HP
+                    </dd>
+                  </div>
+                  <div className="flex items-start justify-between gap-4">
+                    <dt className="text-stone">Creating since</dt>
+                    <dd className="font-semibold">{site.stats.since}</dd>
+                  </div>
+                </dl>
+                <Socials className="mt-8" />
               </div>
-              <div>
-                <dt className="font-light text-white/85">Social</dt>
-                <dd className="font-medium">{handle}</dd>
-              </div>
-              <div>
-                <dt className="font-light text-white/85">Based in</dt>
-                <dd className="font-medium">
-                  {site.location.area}, {site.location.region}
-                </dd>
-              </div>
-            </dl>
+            </Reveal>
           </div>
+        </div>
+
+        {/* Giant outlined brand ticker */}
+        <div className="mt-24 select-none md:mt-32" aria-hidden="true">
+          <Marquee
+            className="text-snow/15"
+            separator={<span className="text-neon">✦</span>}
+            items={[site.brand, site.name, "Himachal Pradesh", "Pahadi Stories"].map((t) => (
+              <span key={t} className="text-outline whitespace-nowrap font-display text-[clamp(4rem,12vw,10rem)] font-extrabold uppercase leading-none tracking-tight">
+                {t}
+              </span>
+            ))}
+          />
         </div>
       </section>
 
       {/* ===== Bottom bar ===== */}
-      <div className="bg-paper">
-        <div className="container-x flex flex-col gap-3 py-7 text-xs font-medium text-charcoal sm:flex-row sm:items-center sm:justify-between">
+      <div className="border-t border-line">
+        <div className="container-x flex flex-col gap-5 py-8 text-sm text-stone md:flex-row md:items-center md:justify-between">
           <p>
-            © {year} by {site.name}. {site.brand}.
+            © {year} {site.name} · {site.brand}
           </p>
           <nav aria-label="Footer">
-            <ul className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <ul className="flex flex-wrap items-center gap-x-6 gap-y-2">
               {[
+                { href: "/", label: "Home" },
                 { href: "/about", label: "About" },
                 { href: "/videos", label: "Videos" },
                 { href: "/shop", label: "Shop" },
                 { href: "/sitemap.xml", label: "Sitemap" },
-              ].map((l, i) => (
-                <li key={l.href} className="flex items-center gap-3">
-                  {i > 0 && <span aria-hidden="true">|</span>}
-                  <Link href={l.href} className="hover:text-coral">
+              ].map((l) => (
+                <li key={l.href}>
+                  <Link href={l.href} className="link-underline hover:text-snow">
                     {l.label}
                   </Link>
+                </li>
+              ))}
+              {activeSocials().map((s) => (
+                <li key={s.key} className="hidden md:block">
+                  <a href={s.href} target="_blank" rel="noopener noreferrer me" className="link-underline hover:text-snow">
+                    {s.label}
+                  </a>
                 </li>
               ))}
             </ul>

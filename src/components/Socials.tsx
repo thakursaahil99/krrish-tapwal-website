@@ -18,14 +18,11 @@ export function activeSocials() {
 
 /**
  * Round social buttons.
- *  - "light": white circles with a teal glyph (used on the teal Follow band)
- *  - "dark":  charcoal circles with a white glyph (used on paper backgrounds)
+ *  - "glass": frosted circles with a snow glyph (dark sections)
+ *  - "dark":  ink circles with a snow glyph (cream sections)
  */
-export default function Socials({ className = "", variant = "dark" }: { className?: string; variant?: "light" | "dark" }) {
-  const circle =
-    variant === "light"
-      ? "bg-white text-teal hover:bg-charcoal hover:text-white"
-      : "bg-charcoal text-white hover:bg-coral";
+export default function Socials({ className = "", variant = "glass" }: { className?: string; variant?: "glass" | "dark" }) {
+  const circle = variant === "glass" ? "glass text-snow hover:bg-neon hover:text-ink hover:border-neon" : "bg-ink text-snow hover:bg-neon hover:text-ink";
   return (
     <ul className={`flex flex-wrap items-center gap-3 ${className}`}>
       {activeSocials().map(({ key, href, label, Icon }) => (
@@ -35,15 +32,15 @@ export default function Socials({ className = "", variant = "dark" }: { classNam
             target="_blank"
             rel="noopener noreferrer me"
             aria-label={`${site.name} on ${label}`}
-            className={`grid size-10 place-items-center rounded-full transition hover:-translate-y-0.5 ${circle}`}
+            className={`grid size-12 place-items-center rounded-full transition duration-300 hover:-translate-y-1 ${circle}`}
           >
-            <Icon width={18} height={18} />
+            <Icon width={19} height={19} />
           </a>
         </li>
       ))}
       {site.email && (
         <li>
-          <a href={`mailto:${site.email}`} aria-label={`Email ${site.name}`} className={`grid size-10 place-items-center rounded-full transition hover:-translate-y-0.5 ${circle}`}>
+          <a href={`mailto:${site.email}`} aria-label={`Email ${site.name}`} className={`grid size-12 place-items-center rounded-full transition duration-300 hover:-translate-y-1 ${circle}`}>
             <MailIcon width={18} height={18} />
           </a>
         </li>
