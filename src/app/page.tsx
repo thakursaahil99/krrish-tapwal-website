@@ -11,16 +11,14 @@ import Rail from "@/components/Rail";
 import Reveal from "@/components/Reveal";
 import RotatingWord from "@/components/RotatingWord";
 import Thumb from "@/components/Thumb";
-import YouTubeEmbed from "@/components/YouTubeEmbed";
 import { ArrowUpRightIcon, BikeIcon, ChartIcon, CodeIcon, CompassIcon, InstagramIcon, MapPinIcon, PlayIcon, YouTubeIcon } from "@/components/icons";
 import { JsonLd, PlayBadge, SectionHeading, ShortCard, VideoCard } from "@/components/ui";
 import { gallery } from "@/data/gallery";
 import { products } from "@/data/shop";
 import { site } from "@/data/site";
 import { garage, places, timeline } from "@/data/videos";
-import { compactNumber, formatDate, timeAgo } from "@/lib/format";
 import { graph, profilePageSchema, videoSchema } from "@/lib/schema";
-import { getChannelContent, getChannelProfileImage, getChannelStats, shortUrl, watchUrl } from "@/lib/youtube";
+import { getChannelContent, getChannelProfileImage, getChannelStats, watchUrl } from "@/lib/youtube";
 
 // Har 5 minute mein YouTube se nayi videos + stats refresh (ISR)
 export const revalidate = 300;
@@ -49,15 +47,7 @@ const identityIcons = [CompassIcon, CodeIcon, ChartIcon, BikeIcon];
 export default async function HomePage() {
   const [{ videos, shorts }, live, profileImage] = await Promise.all([getChannelContent(), getChannelStats(), getChannelProfileImage()]);
   const [featured] = videos;
-  // Newest upload across videos AND shorts — the "Just dropped" section always shows this one
-  const newestShort = shorts[0];
-  const latest =
-    newestShort && (!featured || +new Date(newestShort.publishedAt) > +new Date(featured.publishedAt))
-      ? ({ kind: "short", ...newestShort } as const)
-      : featured
-        ? ({ kind: "video", ...featured } as const)
-        : null;
-  const recent = videos.filter((v) => v.id !== latest?.id).slice(0, 3);
+  const recent = videos.slice(0, 3);
   const instaHandle = site.socials.instagram ? `@${site.socials.instagram.replace(/\/+$/, "").split("/").pop()}` : site.youtube.handle;
   const roles = site.identities.map((i) => i.title);
   const merch = products.slice(0, 4);
@@ -104,7 +94,7 @@ export default async function HomePage() {
             </p>
 
             <div className="fade-in mt-10 flex flex-wrap gap-3" style={d(650)}>
-              <a href="#latest" className="btn btn-primary">
+              <a href="#recent" className="btn btn-primary">
                 <PlayIcon width={14} height={14} /> Watch latest drop
               </a>
               <a href={site.youtube.subscribeUrl} target="_blank" rel="noopener noreferrer" className="btn btn-subscribe btn-ghost">
@@ -172,7 +162,7 @@ export default async function HomePage() {
             {/* Floating latest-video card */}
             {featured && (
               <a
-                href="#latest"
+                href="#recent"
                 className="glass group absolute -left-4 top-10 hidden w-64 animate-float items-center gap-3 rounded-2xl p-2.5 pr-4 shadow-2xl sm:flex lg:-left-14"
                 style={{ "--r": "-3deg" } as CSSProperties}
               >
@@ -231,70 +221,11 @@ export default async function HomePage() {
         />
       </div>
 
-      {/* ================= JUST DROPPED — always the single newest upload ================= */}
-      {latest && (
-        <section id="latest" className="scroll-mt-24 pt-28 md:pt-40" aria-labelledby="latest-title">
-          <div className="container-x">
-            <SectionHeading index="01" eyebrow="Just dropped" id="latest-title" intro="The newest upload from the channel — this spot updates on its own within minutes of a new video or Short going live.">
-              Latest <span className="text-glow">upload</span>
-            </SectionHeading>
-
-            <div className={`grid items-center gap-8 ${latest.kind === "video" ? "lg:grid-cols-[1.7fr_1fr]" : "md:grid-cols-[minmax(0,22rem)_1fr] lg:gap-14"}`}>
-              <Reveal variant="scale" className={latest.kind === "short" ? "mx-auto w-full max-w-[22rem]" : ""}>
-                {latest.kind === "video" ? (
-                  <YouTubeEmbed id={latest.id} title={latest.title} label="Latest upload" />
-                ) : (
-                  <ShortCard short={latest} className="w-full" />
-                )}
-              </Reveal>
-
-              <Reveal variant="left" delay={120} className="glass glow-border spot rounded-[2rem] p-7 sm:p-9">
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className="hud inline-flex items-center gap-2 rounded-full bg-[#ff0033] px-3 py-1.5 text-white">
-                    <span className="relative flex size-2">
-                      <span className="absolute inset-0 animate-ping rounded-full bg-white" />
-                      <span className="relative size-2 rounded-full bg-white" />
-                    </span>
-                    New
-                  </span>
-                  <span className="hud rounded-full border border-line px-3 py-1.5 text-stone">{latest.kind === "short" ? "Short" : "Video"}</span>
-                  <span className="hud text-stone">
-                    <time dateTime={latest.publishedAt}>{timeAgo(latest.publishedAt)}</time>
-                  </span>
-                </div>
-                <h3 className="mt-6 font-display text-2xl font-bold leading-tight tracking-tight sm:text-3xl">{latest.title}</h3>
-                {latest.kind === "video" && <p className="mt-4 leading-relaxed text-stone">{latest.description}</p>}
-                <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-3 text-sm">
-                  {latest.views ? (
-                    <div>
-                      <dt className="hud text-stone">Views</dt>
-                      <dd className="mt-1 font-display text-2xl font-bold text-neon">{compactNumber(latest.views)}</dd>
-                    </div>
-                  ) : null}
-                  <div>
-                    <dt className="hud text-stone">Uploaded</dt>
-                    <dd className="mt-1 font-display text-2xl font-bold">{formatDate(latest.publishedAt)}</dd>
-                  </div>
-                </dl>
-                <div className="mt-8 flex flex-wrap gap-3">
-                  <a href={latest.kind === "short" ? shortUrl(latest.id) : watchUrl(latest.id)} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
-                    <PlayIcon width={14} height={14} /> Watch on YouTube
-                  </a>
-                  <a href={site.youtube.subscribeUrl} target="_blank" rel="noopener noreferrer" className="btn btn-subscribe btn-ghost">
-                    <YouTubeIcon width={18} height={18} /> Subscribe
-                  </a>
-                </div>
-              </Reveal>
-            </div>
-          </div>
-        </section>
-      )}
-
       {/* ================= CREATOR PROFILE (bento) ================= */}
       <section className="relative py-28 md:py-40" aria-labelledby="about-title">
         <div className="container-x">
           <SectionHeading
-            index="02"
+            index="01"
             eyebrow="Creator profile"
             id="about-title"
             action={
@@ -383,7 +314,7 @@ export default async function HomePage() {
       <section id="recent" className="scroll-mt-24 pb-28 md:pb-40" aria-labelledby="recent-title">
         <div className="container-x">
           <SectionHeading
-            index="03"
+            index="02"
             eyebrow="Recent uploads"
             id="recent-title"
             intro="New uploads are added here automatically — no manual updates needed."
@@ -407,7 +338,7 @@ export default async function HomePage() {
       {/* ================= HIDDEN HIMACHAL (stacked cards) ================= */}
       <section className="pb-28 md:pb-40" aria-labelledby="places-title">
         <div className="container-x">
-          <SectionHeading index="04" eyebrow="Hidden Himachal" id="places-title" intro="Forts on ridgelines, temples above the clouds — the lesser-known side of Mandi district, one trail at a time.">
+          <SectionHeading index="03" eyebrow="Hidden Himachal" id="places-title" intro="Forts on ridgelines, temples above the clouds — the lesser-known side of Mandi district, one trail at a time.">
             Places off the <span className="text-glow">map</span>
           </SectionHeading>
 
@@ -454,7 +385,7 @@ export default async function HomePage() {
       <section className="pb-28 md:pb-40" aria-labelledby="shorts-title">
         <div className="container-x">
           <SectionHeading
-            index="05"
+            index="04"
             eyebrow="Shorts"
             id="shorts-title"
             intro="60 seconds of mountains, machines and mandirs. The bite-size side of the channel."
@@ -479,7 +410,7 @@ export default async function HomePage() {
       {/* ================= GARAGE ================= */}
       <section className="pb-28 md:pb-40" aria-labelledby="garage-title">
         <div className="container-x">
-          <SectionHeading index="06" eyebrow="The garage" id="garage-title" align="center" intro="Two machines, a hundred mountain roads.">
+          <SectionHeading index="05" eyebrow="The garage" id="garage-title" align="center" intro="Two machines, a hundred mountain roads.">
             Built for the <span className="text-glow">hills</span>
           </SectionHeading>
           <div className="grid gap-6 md:grid-cols-2">
@@ -513,7 +444,7 @@ export default async function HomePage() {
       <section id="gallery" className="scroll-mt-24 pb-28 md:pb-40" aria-labelledby="gallery-title">
         <div className="container-x">
           <SectionHeading
-            index="07"
+            index="06"
             eyebrow="Through my lens"
             id="gallery-title"
             intro="Frames from the trail — straight from the vlogs, Shorts and the camera roll."
@@ -577,7 +508,7 @@ export default async function HomePage() {
       {/* ================= JOURNEY ================= */}
       <section className="pb-28 md:pb-40" aria-labelledby="journey-title">
         <div className="container-x">
-          <SectionHeading index="08" eyebrow="Changelog" id="journey-title" align="center">
+          <SectionHeading index="07" eyebrow="Changelog" id="journey-title" align="center">
             The journey <span className="text-glow">so far</span>
           </SectionHeading>
           <ol className="relative mx-auto max-w-4xl">
@@ -607,7 +538,7 @@ export default async function HomePage() {
       <section className="pb-28 md:pb-40" aria-labelledby="shop-title">
         <div className="container-x">
           <SectionHeading
-            index="09"
+            index="08"
             eyebrow="Merch · launching soon"
             id="shop-title"
             intro="XploreWithKrrish drops and locally sourced Himachali goodies, straight from the hills."
