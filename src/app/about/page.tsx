@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import AutoPlayer from "@/components/AutoPlayer";
 import CountUp from "@/components/CountUp";
 import Reveal from "@/components/Reveal";
 import Socials from "@/components/Socials";
@@ -12,7 +13,7 @@ import { places, timeline } from "@/data/videos";
 import { breadcrumbSchema, faqSchema, graph, profilePageSchema } from "@/lib/schema";
 import { getChannelProfileImage, getChannelStats, watchUrl } from "@/lib/youtube";
 
-export const revalidate = 900;
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "About — CSE Engineer & Data Scientist",
@@ -166,6 +167,7 @@ export default async function AboutPage() {
               <Reveal key={p.name} delay={(i % 2) * 100} variant="scale" as="article">
                 <a href={watchUrl(p.videoId)} target="_blank" rel="noopener noreferrer" className="glow-border group card-zoom relative block aspect-[4/3] overflow-hidden rounded-[2rem] bg-panel-2">
                   <Thumb id={p.videoId} alt={`${p.name}, ${p.area}`} sizes="(min-width: 640px) 50vw, 100vw" />
+                  <AutoPlayer id={p.videoId} start={site.videoPreviewStart} />
                   <span className="absolute inset-0 bg-gradient-to-t from-ink via-ink/30 to-transparent" />
                   <span className="absolute inset-0 grid place-items-center opacity-0 transition duration-500 group-hover:opacity-100">
                     <PlayBadge />

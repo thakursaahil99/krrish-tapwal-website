@@ -89,7 +89,7 @@ export default function ShopPage() {
               Be first in line for the <span className="text-glow">launch</span>
             </h2>
             <p className="relative mx-auto mt-6 max-w-lg text-lg text-stone">The store launch will be announced on YouTube. Subscribe and hit the bell.</p>
-            <a href={site.youtube.subscribeUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary relative mt-10">
+            <a href={site.youtube.subscribeUrl} target="_blank" rel="noopener noreferrer" className="btn btn-subscribe btn-primary relative mt-10">
               <YouTubeIcon width={18} height={18} /> Subscribe for updates
             </a>
           </Reveal>

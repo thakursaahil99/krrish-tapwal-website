@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { site } from "@/data/site";
 import { getChannelContent, thumb } from "@/lib/youtube";
 
-export const revalidate = 900;
+export const revalidate = 300;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const { videos } = await getChannelContent();

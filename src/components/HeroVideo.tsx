@@ -16,6 +16,7 @@ export default function HeroVideo({ id, start = 0 }: { id: string; start?: numbe
   const frame = useRef<HTMLIFrameElement>(null);
   const [mount, setMount] = useState(false);
   const [visible, setVisible] = useState(false);
+  const playingRef = useRef(false);
 
   // Send a command to the YouTube player inside the iframe
   const command = useCallback((func: string, args: unknown[] = []) => {
@@ -36,8 +37,12 @@ export default function HeroVideo({ id, start = 0 }: { id: string; start?: numbe
   useEffect(() => {
     if (!mount) return;
 
-    // Kick playback a few times while the player boots
-    const kicks = [800, 1800, 3500, 6000].map((ms) => window.setTimeout(play, ms));
+    // Keep nudging the player until it really plays (it can take a while to boot)
+    let tries = 0;
+    const kicker = window.setInterval(() => {
+      if (playingRef.current || ++tries > 40) return clearInterval(kicker);
+      play();
+    }, 1500);
 
     // "Auto click": the first user gesture anywhere also starts it
     const gestures = ["pointerdown", "touchstart", "keydown", "scroll", "wheel"] as const;
@@ -46,12 +51,20 @@ export default function HeroVideo({ id, start = 0 }: { id: string; start?: numbe
 
     // Listen to the player: fade in once it is really playing
     const onMessage = (e: MessageEvent) => {
-      if (typeof e.data !== "string" || !/^https:\/\/www\.youtube(-nocookie)?\.com$/.test(e.origin)) return;
+      // only this hero's own player (reels on the page talk on the same channel)
+      if (e.source !== frame.current?.contentWindow || typeof e.data !== "string") return;
       try {
         const msg = JSON.parse(e.data);
         const state = msg?.info?.playerState ?? (msg.event === "onStateChange" ? msg.info : undefined);
-        if (state === 1) setVisible(true); // 1 = playing
-        if (state === 0) command("seekTo", [start, true]); // ended → loop from start
+        if (state === 1) {
+          playingRef.current = true; // 1 = playing
+          setVisible(true);
+        }
+        if (state === 0) {
+          // ended → loop from `start` (not from 0:00)
+          command("seekTo", [start, true]);
+          play();
+        }
         if (state === 2 || state === 5 || state === -1) play(); // paused / cued / unstarted → play
       } catch {
         /* not a player message */
@@ -60,7 +73,7 @@ export default function HeroVideo({ id, start = 0 }: { id: string; start?: numbe
     window.addEventListener("message", onMessage);
 
     return () => {
-      kicks.forEach(clearTimeout);
+      clearInterval(kicker);
       gestures.forEach((g) => window.removeEventListener(g, onGesture));
       window.removeEventListener("message", onMessage);
     };
@@ -77,8 +90,7 @@ export default function HeroVideo({ id, start = 0 }: { id: string; start?: numbe
   const params = new URLSearchParams({
     autoplay: "1",
     mute: "1",
-    loop: "1",
-    playlist: id,
+    // No `loop`/`playlist` here: YouTube's own loop restarts at 0:00. We loop from `start` ourselves.
     controls: "0",
     start: String(start),
     playsinline: "1",

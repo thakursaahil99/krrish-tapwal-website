@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties } from "react";
+import AutoPlayer from "@/components/AutoPlayer";
 import CountUp from "@/components/CountUp";
 import HeroVideo from "@/components/HeroVideo";
 import Marquee from "@/components/Marquee";
@@ -12,17 +13,17 @@ import RotatingWord from "@/components/RotatingWord";
 import Thumb from "@/components/Thumb";
 import YouTubeEmbed from "@/components/YouTubeEmbed";
 import { ArrowUpRightIcon, BikeIcon, ChartIcon, CodeIcon, CompassIcon, InstagramIcon, MapPinIcon, PlayIcon, YouTubeIcon } from "@/components/icons";
-import { JsonLd, PlayBadge, SectionHeading, ShortCard } from "@/components/ui";
+import { JsonLd, PlayBadge, SectionHeading, ShortCard, VideoCard } from "@/components/ui";
 import { gallery } from "@/data/gallery";
 import { products } from "@/data/shop";
 import { site } from "@/data/site";
 import { garage, places, timeline } from "@/data/videos";
-import { formatDate } from "@/lib/format";
+import { compactNumber, formatDate, timeAgo } from "@/lib/format";
 import { graph, profilePageSchema, videoSchema } from "@/lib/schema";
-import { getChannelContent, getChannelProfileImage, getChannelStats, watchUrl } from "@/lib/youtube";
+import { getChannelContent, getChannelProfileImage, getChannelStats, shortUrl, watchUrl } from "@/lib/youtube";
 
-// Har 15 minute mein YouTube se nayi videos + stats refresh (ISR)
-export const revalidate = 900;
+// Har 5 minute mein YouTube se nayi videos + stats refresh (ISR)
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Himachal Explorer, CSE Engineer & Data Scientist",
@@ -47,7 +48,16 @@ const identityIcons = [CompassIcon, CodeIcon, ChartIcon, BikeIcon];
 
 export default async function HomePage() {
   const [{ videos, shorts }, live, profileImage] = await Promise.all([getChannelContent(), getChannelStats(), getChannelProfileImage()]);
-  const [featured, ...rest] = videos;
+  const [featured] = videos;
+  // Newest upload across videos AND shorts — the "Just dropped" section always shows this one
+  const newestShort = shorts[0];
+  const latest =
+    newestShort && (!featured || +new Date(newestShort.publishedAt) > +new Date(featured.publishedAt))
+      ? ({ kind: "short", ...newestShort } as const)
+      : featured
+        ? ({ kind: "video", ...featured } as const)
+        : null;
+  const recent = videos.filter((v) => v.id !== latest?.id).slice(0, 3);
   const instaHandle = site.socials.instagram ? `@${site.socials.instagram.replace(/\/+$/, "").split("/").pop()}` : site.youtube.handle;
   const roles = site.identities.map((i) => i.title);
   const merch = products.slice(0, 4);
@@ -97,7 +107,7 @@ export default async function HomePage() {
               <a href="#latest" className="btn btn-primary">
                 <PlayIcon width={14} height={14} /> Watch latest drop
               </a>
-              <a href={site.youtube.subscribeUrl} target="_blank" rel="noopener noreferrer" className="btn btn-ghost">
+              <a href={site.youtube.subscribeUrl} target="_blank" rel="noopener noreferrer" className="btn btn-subscribe btn-ghost">
                 <YouTubeIcon width={18} height={18} /> Subscribe
               </a>
             </div>
@@ -193,7 +203,7 @@ export default async function HomePage() {
                   <textPath href="#badge-circle">Subscribe • XploreWithKrrish • </textPath>
                 </text>
               </svg>
-              <span className="relative grid size-14 place-items-center rounded-full bg-neon text-ink shadow-[0_0_40px_rgb(255_122_47/0.6)] transition duration-500 group-hover:scale-110">
+              <span className="relative grid size-14 place-items-center rounded-full bg-neon text-ink shadow-[0_0_40px_rgb(255_122_47/0.6)] transition duration-500 group-hover:scale-110 group-hover:bg-[#ff0033] group-hover:text-white group-hover:shadow-[0_0_44px_rgb(255_0_51/0.75)]">
                 <YouTubeIcon width={24} height={24} />
               </span>
             </a>
@@ -221,11 +231,70 @@ export default async function HomePage() {
         />
       </div>
 
+      {/* ================= JUST DROPPED — always the single newest upload ================= */}
+      {latest && (
+        <section id="latest" className="scroll-mt-24 pt-28 md:pt-40" aria-labelledby="latest-title">
+          <div className="container-x">
+            <SectionHeading index="01" eyebrow="Just dropped" id="latest-title" intro="The newest upload from the channel — this spot updates on its own within minutes of a new video or Short going live.">
+              Latest <span className="text-glow">upload</span>
+            </SectionHeading>
+
+            <div className={`grid items-center gap-8 ${latest.kind === "video" ? "lg:grid-cols-[1.7fr_1fr]" : "md:grid-cols-[minmax(0,22rem)_1fr] lg:gap-14"}`}>
+              <Reveal variant="scale" className={latest.kind === "short" ? "mx-auto w-full max-w-[22rem]" : ""}>
+                {latest.kind === "video" ? (
+                  <YouTubeEmbed id={latest.id} title={latest.title} label="Latest upload" />
+                ) : (
+                  <ShortCard short={latest} className="w-full" />
+                )}
+              </Reveal>
+
+              <Reveal variant="left" delay={120} className="glass glow-border spot rounded-[2rem] p-7 sm:p-9">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="hud inline-flex items-center gap-2 rounded-full bg-[#ff0033] px-3 py-1.5 text-white">
+                    <span className="relative flex size-2">
+                      <span className="absolute inset-0 animate-ping rounded-full bg-white" />
+                      <span className="relative size-2 rounded-full bg-white" />
+                    </span>
+                    New
+                  </span>
+                  <span className="hud rounded-full border border-line px-3 py-1.5 text-stone">{latest.kind === "short" ? "Short" : "Video"}</span>
+                  <span className="hud text-stone">
+                    <time dateTime={latest.publishedAt}>{timeAgo(latest.publishedAt)}</time>
+                  </span>
+                </div>
+                <h3 className="mt-6 font-display text-2xl font-bold leading-tight tracking-tight sm:text-3xl">{latest.title}</h3>
+                {latest.kind === "video" && <p className="mt-4 leading-relaxed text-stone">{latest.description}</p>}
+                <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-3 text-sm">
+                  {latest.views ? (
+                    <div>
+                      <dt className="hud text-stone">Views</dt>
+                      <dd className="mt-1 font-display text-2xl font-bold text-neon">{compactNumber(latest.views)}</dd>
+                    </div>
+                  ) : null}
+                  <div>
+                    <dt className="hud text-stone">Uploaded</dt>
+                    <dd className="mt-1 font-display text-2xl font-bold">{formatDate(latest.publishedAt)}</dd>
+                  </div>
+                </dl>
+                <div className="mt-8 flex flex-wrap gap-3">
+                  <a href={latest.kind === "short" ? shortUrl(latest.id) : watchUrl(latest.id)} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
+                    <PlayIcon width={14} height={14} /> Watch on YouTube
+                  </a>
+                  <a href={site.youtube.subscribeUrl} target="_blank" rel="noopener noreferrer" className="btn btn-subscribe btn-ghost">
+                    <YouTubeIcon width={18} height={18} /> Subscribe
+                  </a>
+                </div>
+              </Reveal>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ================= CREATOR PROFILE (bento) ================= */}
       <section className="relative py-28 md:py-40" aria-labelledby="about-title">
         <div className="container-x">
           <SectionHeading
-            index="01"
+            index="02"
             eyebrow="Creator profile"
             id="about-title"
             action={
@@ -310,46 +379,27 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ================= LATEST DROP ================= */}
-      <section id="latest" className="scroll-mt-24 pb-28 md:pb-40" aria-labelledby="latest-title">
+      {/* ================= RECENT VIDEOS (auto-updating) ================= */}
+      <section id="recent" className="scroll-mt-24 pb-28 md:pb-40" aria-labelledby="recent-title">
         <div className="container-x">
           <SectionHeading
-            index="02"
-            eyebrow="Latest drop"
-            id="latest-title"
-            intro="Fresh from the channel — new uploads land here automatically within minutes of going live."
+            index="03"
+            eyebrow="Recent uploads"
+            id="recent-title"
+            intro="New uploads are added here automatically — no manual updates needed."
             action={
               <Link href="/videos" className="btn btn-ghost">
                 All videos <ArrowUpRightIcon width={16} height={16} className="btn-arrow" />
               </Link>
             }
           >
-            Now <span className="text-glow">streaming</span>
+            Fresh from the <span className="text-glow">channel</span>
           </SectionHeading>
 
-          <div className="grid gap-6 lg:grid-cols-[1.7fr_1fr]">
-            {featured && (
-              <Reveal variant="scale">
-                <YouTubeEmbed id={featured.id} title={featured.title} label={`New · ${formatDate(featured.publishedAt)}`} />
-              </Reveal>
-            )}
-            <div className="flex flex-col gap-3">
-              <p className="hud px-1 text-stone">Up next</p>
-              {rest.slice(0, 4).map((v, i) => (
-                <Reveal key={v.id} delay={i * 80} variant="left">
-                  <a href={watchUrl(v.id)} target="_blank" rel="noopener noreferrer" className="glass glow-border spot group card-zoom flex items-center gap-4 rounded-2xl p-2.5">
-                    <span className="relative aspect-video w-32 shrink-0 overflow-hidden rounded-xl sm:w-36">
-                      <Thumb id={v.id} alt="" sizes="144px" />
-                      {v.duration && <span className="hud absolute bottom-1.5 right-1.5 rounded bg-ink/85 px-1.5 py-0.5 !text-[0.6rem]">{v.duration}</span>}
-                    </span>
-                    <span className="min-w-0 flex-1 pr-2">
-                      <span className="line-clamp-2 text-sm font-semibold leading-snug transition group-hover:text-neon">{v.title}</span>
-                      <span className="hud mt-2 block text-stone">{formatDate(v.publishedAt)}</span>
-                    </span>
-                  </a>
-                </Reveal>
-              ))}
-            </div>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {recent.map((v, i) => (
+              <VideoCard key={v.id} video={v} delay={i * 80} />
+            ))}
           </div>
         </div>
       </section>
@@ -357,7 +407,7 @@ export default async function HomePage() {
       {/* ================= HIDDEN HIMACHAL (stacked cards) ================= */}
       <section className="pb-28 md:pb-40" aria-labelledby="places-title">
         <div className="container-x">
-          <SectionHeading index="03" eyebrow="Hidden Himachal" id="places-title" intro="Forts on ridgelines, temples above the clouds — the lesser-known side of Mandi district, one trail at a time.">
+          <SectionHeading index="04" eyebrow="Hidden Himachal" id="places-title" intro="Forts on ridgelines, temples above the clouds — the lesser-known side of Mandi district, one trail at a time.">
             Places off the <span className="text-glow">map</span>
           </SectionHeading>
 
@@ -372,6 +422,7 @@ export default async function HomePage() {
                 >
                   <div className="relative aspect-video md:aspect-auto md:min-h-[26rem]">
                     <Thumb id={p.videoId} alt={`${p.name}, ${p.area}`} sizes="(min-width: 768px) 55vw, 100vw" />
+                    <AutoPlayer id={p.videoId} start={site.videoPreviewStart} />
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent to-panel/40" />
                     <span className="absolute inset-0 grid place-items-center opacity-0 transition duration-500 group-hover:opacity-100">
                       <PlayBadge />
@@ -403,7 +454,7 @@ export default async function HomePage() {
       <section className="pb-28 md:pb-40" aria-labelledby="shorts-title">
         <div className="container-x">
           <SectionHeading
-            index="04"
+            index="05"
             eyebrow="Shorts"
             id="shorts-title"
             intro="60 seconds of mountains, machines and mandirs. The bite-size side of the channel."
@@ -417,7 +468,7 @@ export default async function HomePage() {
           </SectionHeading>
         </div>
         <Reveal>
-          <Rail label="YouTube Shorts">
+          <Rail label="YouTube Shorts" autoSlide={3000}>
             {shorts.slice(0, 12).map((s) => (
               <ShortCard key={s.id} short={s} className="w-[68vw] sm:w-64 lg:w-72" />
             ))}
@@ -428,7 +479,7 @@ export default async function HomePage() {
       {/* ================= GARAGE ================= */}
       <section className="pb-28 md:pb-40" aria-labelledby="garage-title">
         <div className="container-x">
-          <SectionHeading index="05" eyebrow="The garage" id="garage-title" align="center" intro="Two machines, a hundred mountain roads.">
+          <SectionHeading index="06" eyebrow="The garage" id="garage-title" align="center" intro="Two machines, a hundred mountain roads.">
             Built for the <span className="text-glow">hills</span>
           </SectionHeading>
           <div className="grid gap-6 md:grid-cols-2">
@@ -437,6 +488,7 @@ export default async function HomePage() {
                 <a href={watchUrl(g.videoId)} target="_blank" rel="noopener noreferrer" className="glass glow-border spot group card-zoom block overflow-hidden rounded-[2rem] p-2.5">
                   <div className="relative aspect-[16/10] overflow-hidden rounded-[1.5rem]">
                     <Thumb id={g.videoId} alt={`${g.name} ${g.variant}`} sizes="(min-width: 768px) 50vw, 100vw" />
+                    <AutoPlayer id={g.videoId} start={site.videoPreviewStart} />
                     <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/10 to-transparent" />
                     <span className="hud absolute left-4 top-4 rounded-full bg-neon px-3 py-1.5 text-ink">{i === 0 ? "Two wheels" : "Four wheels"}</span>
                     <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
@@ -461,7 +513,7 @@ export default async function HomePage() {
       <section id="gallery" className="scroll-mt-24 pb-28 md:pb-40" aria-labelledby="gallery-title">
         <div className="container-x">
           <SectionHeading
-            index="06"
+            index="07"
             eyebrow="Through my lens"
             id="gallery-title"
             intro="Frames from the trail — straight from the vlogs, Shorts and the camera roll."
@@ -525,7 +577,7 @@ export default async function HomePage() {
       {/* ================= JOURNEY ================= */}
       <section className="pb-28 md:pb-40" aria-labelledby="journey-title">
         <div className="container-x">
-          <SectionHeading index="07" eyebrow="Changelog" id="journey-title" align="center">
+          <SectionHeading index="08" eyebrow="Changelog" id="journey-title" align="center">
             The journey <span className="text-glow">so far</span>
           </SectionHeading>
           <ol className="relative mx-auto max-w-4xl">
@@ -555,7 +607,7 @@ export default async function HomePage() {
       <section className="pb-28 md:pb-40" aria-labelledby="shop-title">
         <div className="container-x">
           <SectionHeading
-            index="08"
+            index="09"
             eyebrow="Merch · launching soon"
             id="shop-title"
             intro="XploreWithKrrish drops and locally sourced Himachali goodies, straight from the hills."

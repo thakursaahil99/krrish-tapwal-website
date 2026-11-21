@@ -3,11 +3,57 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ArrowRightIcon } from "./icons";
 
-/** Horizontal snap-scrolling rail with prev/next buttons and a progress bar */
-export default function Rail({ children, label }: { children: ReactNode; label: string }) {
+/**
+ * Horizontal snap-scrolling rail with prev/next buttons and a progress bar.
+ * `autoSlide` (ms) moves it one card at a time and wraps back to the start; it pauses
+ * while the pointer is over it, while it's touched/focused, and when it's off screen.
+ */
+export default function Rail({ children, label, autoSlide }: { children: ReactNode; label: string; autoSlide?: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
   const [edges, setEdges] = useState({ start: true, end: false });
+  const hold = useRef(0); // timestamp until which auto-slide stays paused
+  const hovering = useRef(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !autoSlide) return;
+    let visible = false;
+    const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting), { threshold: 0.3 });
+    io.observe(el);
+
+    const pause = () => (hold.current = Date.now() + 4000);
+    const enter = () => (hovering.current = true);
+    const leave = () => {
+      hovering.current = false;
+      pause();
+    };
+    el.addEventListener("pointerenter", enter);
+    el.addEventListener("pointerleave", leave);
+    el.addEventListener("touchstart", pause, { passive: true });
+    el.addEventListener("focusin", pause);
+
+    const tick = window.setInterval(() => {
+      if (!visible || hovering.current || Date.now() < hold.current || document.hidden) return;
+      const max = el.scrollWidth - el.clientWidth;
+      if (el.scrollLeft >= max - 8) {
+        el.scrollTo({ left: 0, behavior: "smooth" });
+        return;
+      }
+      const card = el.firstElementChild as HTMLElement | null;
+      const gap = parseFloat(getComputedStyle(el).columnGap) || 16;
+      el.scrollBy({ left: (card?.offsetWidth ?? el.clientWidth / 4) + gap, behavior: "smooth" });
+    }, autoSlide);
+
+    return () => {
+      clearInterval(tick);
+      io.disconnect();
+      el.removeEventListener("pointerenter", enter);
+      el.removeEventListener("pointerleave", leave);
+      el.removeEventListener("touchstart", pause);
+      el.removeEventListener("focusin", pause);
+    };
+  }, [autoSlide]);
 
   useEffect(() => {
     const el = ref.current;
@@ -26,7 +72,10 @@ export default function Rail({ children, label }: { children: ReactNode; label: 
     };
   }, []);
 
-  const go = (dir: 1 | -1) => ref.current?.scrollBy({ left: dir * ref.current.clientWidth * 0.8, behavior: "smooth" });
+  const go = (dir: 1 | -1) => {
+    hold.current = Date.now() + 6000; // manual navigation pauses auto-slide for a bit
+    ref.current?.scrollBy({ left: dir * ref.current.clientWidth * 0.8, behavior: "smooth" });
+  };
   const btn = "glass grid size-12 place-items-center rounded-full transition duration-300 hover:bg-neon hover:text-ink disabled:pointer-events-none disabled:opacity-30";
 
   return (

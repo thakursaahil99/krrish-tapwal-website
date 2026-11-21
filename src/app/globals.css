@@ -326,6 +326,14 @@
   .btn-ghost::before { background: var(--color-snow); }
   .btn-ghost:hover { color: var(--color-ink); border-color: var(--color-snow); }
 
+  /* Every "Subscribe" button: YouTube red slides in on hover */
+  .btn-subscribe::before { background: #ff0033; }
+  .btn-subscribe:hover {
+    color: #fff;
+    border-color: #ff0033;
+    box-shadow: 0 0 0 1px #ff0033, 0 14px 44px -10px rgb(255 0 51 / 0.75);
+  }
+
   /* Animated underline link */
   .link-underline {
     background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;

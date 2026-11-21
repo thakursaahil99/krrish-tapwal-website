@@ -10,7 +10,7 @@ import { formatDate } from "@/lib/format";
 import { breadcrumbSchema, graph, videoSchema } from "@/lib/schema";
 import { getChannelContent, getChannelStats } from "@/lib/youtube";
 
-export const revalidate = 900;
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Videos & Shorts",
@@ -70,7 +70,7 @@ export default async function VideosPage() {
                 </dd>
               </div>
             </dl>
-            <a href={site.youtube.subscribeUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary mt-6 w-full">
+            <a href={site.youtube.subscribeUrl} target="_blank" rel="noopener noreferrer" className="btn btn-subscribe btn-primary mt-6 w-full">
               <YouTubeIcon width={18} height={18} /> Subscribe
             </a>
           </div>

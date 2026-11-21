@@ -1,4 +1,7 @@
 import HeroVideo from "./HeroVideo";
+import AutoPlayer from "./AutoPlayer";
+import ShortPlayer from "./ShortPlayer";
+import { site } from "@/data/site";
 import type { CSSProperties, ReactNode } from "react";
 import { categoryLabels, type Short, type Video } from "@/data/videos";
 import { compactNumber, formatDate } from "@/lib/format";
@@ -137,6 +140,7 @@ export function VideoCard({ video, delay = 0, size = "md" }: { video: Video; del
       <a href={watchUrl(video.id)} target="_blank" rel="noopener noreferrer" className="glass glow-border spot card-zoom flex h-full flex-col rounded-3xl p-2.5">
         <div className="relative aspect-video overflow-hidden rounded-2xl bg-panel-2">
           <Thumb id={video.id} alt={video.title} sizes={size === "lg" ? "(min-width: 1024px) 60vw, 100vw" : "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"} />
+          <AutoPlayer id={video.id} start={site.videoPreviewStart} />
           <span className="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-transparent" />
           <span className="absolute inset-0 grid scale-75 place-items-center opacity-0 transition duration-500 group-hover:scale-100 group-hover:opacity-100">
             <PlayBadge size="sm" />
@@ -171,6 +175,7 @@ export function ShortCard({ short, className = "" }: { short: Short; className?:
       className={`glow-border card-zoom group relative block aspect-[9/16] shrink-0 snap-start overflow-hidden rounded-[1.75rem] bg-panel-2 ${className}`}
     >
       <Thumb id={short.id} kind="short" alt={short.title} sizes="(min-width: 1024px) 20vw, 60vw" />
+      <ShortPlayer id={short.id} />
       <span className="absolute inset-0 bg-gradient-to-t from-ink via-ink/10 to-transparent" />
       <span className="glass hud absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 !text-[0.6rem]">
         <PlayIcon width={9} height={9} className="text-neon" /> Short

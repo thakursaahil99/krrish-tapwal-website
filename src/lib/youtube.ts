@@ -2,9 +2,9 @@ import { site } from "@/data/site";
 import { shorts as staticShorts, videos as staticVideos, type Short, type Video, type VideoCategory } from "@/data/videos";
 
 const FEED_URL = `https://www.youtube.com/feeds/videos.xml?channel_id=${site.youtube.channelId}`;
-// Har 15 minute mein YouTube se nayi uploads + stats check hote hain (ISR).
-// Note: page files mein `export const revalidate = 900` bhi isi value se match karta hai.
-export const YT_REVALIDATE = 900;
+// Har 5 minute mein YouTube se nayi uploads + stats check hote hain (ISR).
+// Note: page files mein `export const revalidate = 300` bhi isi value se match karta hai.
+export const YT_REVALIDATE = 300;
 // YouTube DP ki local copy — YouTube na mile to yeh dikhegi (favicon bhi isi se banta hai)
 const PROFILE_IMAGE_FALLBACK = "/images/krrish-avatar.jpg";
 const PROFILE_PAGE_URL = `https://www.youtube.com/${site.youtube.handle}`;

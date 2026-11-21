@@ -27,16 +27,21 @@ export const site = {
 
   /**
    * Har page ke hero ke peeche chalne wali (muted, faded, loop) YouTube video.
-   * `id` = video ID (youtube.com/watch?v=YAHAN_WALA), `start` = kitne second se shuru ho.
+   * `id` = video ID (youtube.com/watch?v=YAHAN_WALA), `start` = kitne second se shuru ho (240 = 4 minute).
+   * Video khatam hone par wapas `start` se hi chalti hai.
    * (Home hero ki photo apne aap aapki latest YouTube profile photo hoti hai.)
    */
   backgroundVideos: {
-    home: { id: "QHAmMv4mdRE", start: 90 }, // Kanchana Mata Temple, Anantpur Garh
-    about: { id: "Zt6EH13HBM8", start: 60 }, // Bengaluru → Himachal road trip
-    videos: { id: "sY2h1Gsx_ZI", start: 60 }, // Morning ride in the mountains
-    shop: { id: "xcYFq7LX7Is", start: 60 }, // Diwali at home
-    notFound: { id: "sbHuha-IWzY", start: 60 }, // Kamlah Fort trail
+    home: { id: "QHAmMv4mdRE", start: 240 }, // Kanchana Mata Temple, Anantpur Garh
+    about: { id: "Zt6EH13HBM8", start: 240 }, // Bengaluru → Himachal road trip
+    videos: { id: "sY2h1Gsx_ZI", start: 240 }, // Morning ride in the mountains
+    shop: { id: "xcYFq7LX7Is", start: 240 }, // Diwali at home
+    notFound: { id: "sbHuha-IWzY", start: 240 }, // Kamlah Fort trail
   },
+
+  // Site ki saari video cards / players muted autoplay hoti hain — is second se (240 = 4 minute).
+  // (Shorts hamesha shuru se chalte hain; 4 min se chhoti video apne aap 0:00 se chalti hai.)
+  videoPreviewStart: 240,
 
   // "Who I am" chips + cards (About & Home)
   identities: [

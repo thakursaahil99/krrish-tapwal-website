@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { navLinks, site } from "@/data/site";
-import { ArrowUpRightIcon, CloseIcon, MenuIcon, MountainIcon, YouTubeIcon } from "./icons";
+import Image from "next/image";
+import { ArrowUpRightIcon, CloseIcon, MenuIcon, YouTubeIcon } from "./icons";
 
 export default function Header() {
   const pathname = usePathname();
@@ -50,8 +51,20 @@ export default function Header() {
       >
         <div className="container-x flex h-20 items-center justify-between gap-6 md:h-24">
           <Link href="/" className="group relative z-10 flex items-center gap-3" aria-label={`${site.name} — Home`}>
-            <span className="grid size-10 place-items-center rounded-full bg-neon text-ink transition duration-500 group-hover:rotate-[-12deg] group-hover:scale-105">
-              <MountainIcon width={22} height={22} strokeWidth={2.2} />
+            {/* Krrish's photo (head → chest crop) in a sunset-gradient ring */}
+            <span className="relative grid size-11 shrink-0 place-items-center rounded-full bg-gradient-to-br from-gold via-neon to-rose p-[2px] shadow-[0_0_20px_rgb(255_122_47/0.35)] transition duration-500 group-hover:rotate-[-8deg] group-hover:scale-110">
+              <span className="relative block size-full overflow-hidden rounded-full bg-ink">
+                <Image
+                  src="/images/krrish-avatar.jpg"
+                  alt=""
+                  width={900}
+                  height={900}
+                  sizes="80px"
+                  preload
+                  className="absolute max-w-none"
+                  style={{ width: "180%", height: "180%", left: "-27%", top: "-16%" }}
+                />
+              </span>
             </span>
             <span className="leading-none">
               <span className="block font-display text-lg font-bold tracking-tight">{site.name}</span>
@@ -78,7 +91,7 @@ export default function Header() {
           </nav>
 
           <div className="relative z-10 flex items-center gap-2">
-            <a href={site.youtube.subscribeUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary hidden !min-h-11 !px-5 sm:inline-flex">
+            <a href={site.youtube.subscribeUrl} target="_blank" rel="noopener noreferrer" className="btn btn-subscribe btn-primary hidden !min-h-11 !px-5 sm:inline-flex">
               <YouTubeIcon width={18} height={18} /> Subscribe
             </a>
             <button
@@ -122,7 +135,7 @@ export default function Header() {
               </li>
             ))}
           </ul>
-          <a href={site.youtube.subscribeUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary mt-10 w-full">
+          <a href={site.youtube.subscribeUrl} target="_blank" rel="noopener noreferrer" className="btn btn-subscribe btn-primary mt-10 w-full">
             <YouTubeIcon width={18} height={18} /> Subscribe on YouTube
           </a>
         </nav>

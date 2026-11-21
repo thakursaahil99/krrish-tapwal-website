@@ -1,7 +1,7 @@
 import { site } from "@/data/site";
 import { getChannelProfileImage } from "@/lib/youtube";
 
-export const revalidate = 900;
+export const revalidate = 300;
 
 export async function GET() {
   const image = await getChannelProfileImage();

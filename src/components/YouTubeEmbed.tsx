@@ -2,11 +2,14 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { site } from "@/data/site";
+import AutoPlayer from "./AutoPlayer";
 import { PlayIcon } from "./icons";
 
 /**
- * Featured video in a glass "screen" frame (lite embed).
- * The real YouTube player only loads after a click, which keeps the page fast.
+ * Featured video in a glass "screen" frame.
+ * Plays a muted preview (from `site.videoPreviewStart`) while on screen;
+ * a click swaps in the full YouTube player with sound and controls.
  */
 export default function YouTubeEmbed({
   id,
@@ -46,7 +49,9 @@ export default function YouTubeEmbed({
               sizes="(min-width: 1024px) 66vw, 100vw"
               className={`object-cover transition duration-1000 group-hover:scale-[1.03] ${hd ? "" : "scale-[1.34]"}`}
             />
-            <span className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/20 to-ink/30" />
+            {/* muted preview from the 4-minute mark; a click opens the full player with sound */}
+            <AutoPlayer id={id} start={site.videoPreviewStart} />
+            <span className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/10 to-ink/20" />
             {/* scan line */}
             <span className="pointer-events-none absolute inset-0 overflow-hidden opacity-40">
               <span className="absolute inset-x-0 h-1/3 animate-scan bg-gradient-to-b from-transparent via-gold/10 to-transparent" />

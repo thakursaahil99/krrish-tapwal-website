@@ -33,7 +33,7 @@ export default async function Footer() {
                 </p>
               </Reveal>
               <Reveal delay={220} className="mt-10 flex flex-wrap gap-3">
-                <a href={site.youtube.subscribeUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
+                <a href={site.youtube.subscribeUrl} target="_blank" rel="noopener noreferrer" className="btn btn-subscribe btn-primary">
                   <YouTubeIcon width={18} height={18} /> Subscribe on YouTube
                 </a>
                 {site.socials.instagram && (
